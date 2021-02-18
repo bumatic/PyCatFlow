@@ -2,14 +2,14 @@ import drawSvg as draw
 from matplotlib import cm,colors
 import pycatflow as pcf
 
-def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag=True,nodes_color="gray",start_node_color="green",end_node_color="red",palette=None,show_labels=True,label_text="tag",label_color="black",label_size=5,label_shortening="clip",label_position="nodes"):
+def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag=True,nodes_color="gray",start_node_color="green",end_node_color="red",palette=None,show_labels=True,label_text="tag",label_color="black",label_size=5,label_shortening="clip",label_position="nodes",line_opacity=0.5,line_stroke_color="white",line_stroke_width=0.5):
     headers=nodes[0]
     
     sequence=nodes[2]
     
     n_x_spacing=spacing
     n_y_spacing=spacing+(spacing/5)
-    #h_x_shift=[n_x_spacing]
+    
     points=[]
     for n in nodes[1]:
         
@@ -19,7 +19,7 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
             n_y_spacing=spacing+(spacing/5)+n.size
         if n.index>0 and n.x!=nodes[1][n.index-1].x:
             n_x_spacing+=spacing
-            #h_x_shift.append(n.x+n_x_spacing)
+            
         points.append(pcf.Node(n.index,n.x+ n_x_spacing,n.y+n_y_spacing,n.size,n.value,n.width,n.label,n.subtag))
     
     
@@ -31,20 +31,29 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
     elif heigth is None:
         heigth=spacing*4+max([x.y for x in points])
         points=[pcf.Node(n.index,(n.x*(width-spacing*2)/max([x.x for x in points])),n.y,n.size,n.value,n.width,n.label,n.subtag) for n in points]
+        #spacing=points[1].x-(points[0].x+points[0].size)
+        
     elif width is None:
         width=spacing*4+max([x.x for x in points])
         points=[pcf.Node(n.index,n.x,(n.y*(heigth-spacing*2)/max([x.y for x in points])),n.size,n.value,n.width,n.label,n.subtag) for n in points]
-        n_y_spacing=spacing+(spacing/5)
+        n_y_spacing=(spacing/3)
         for n in points:
             if n.index>0 and n.x==nodes[1][n.index-1].x:
                 n_y_spacing+=spacing/5
             else:
-                n_y_spacing=spacing+(spacing/5)
+                n_y_spacing=(spacing/3)
             n.y+=n_y_spacing
 
         
     else:  
-        points=[pcf.Node(n.index,(n.x*(width-spacing)/max([x.x for x in points])),(n.y*(heigth-spacing)/max([x.y for x in points])),n.size,n.value,n.width,n.label,n.subtag) for n in points]      
+        points=[pcf.Node(n.index,(n.x*(width-spacing)/max([x.x for x in points])),(n.y*(heigth-spacing)/max([x.y for x in points])),n.size,n.value,n.width,n.label,n.subtag) for n in points]    
+        n_y_spacing=(spacing/3)
+        for n in points:
+            if n.index>0 and n.x==nodes[1][n.index-1].x:
+                n_y_spacing+=spacing/5
+            else:
+                n_y_spacing=(spacing/3)
+            n.y+=n_y_spacing  
 
     
     if palette is not None:
@@ -76,14 +85,17 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
     #headers
     h_x_shift=[points[0].x]
     
+    
     for x in points:
         if x.x!=points[x.index-1].x and x.index>0:
             h_x_shift.append(x.x)
     
+    n2=h_x_shift[1]-h_x_shift[0]
+    
     for h,x in zip (headers,h_x_shift):
         l=label_size
         if label_shortening=="resize":
-            while len(h)*(l/2)>spacing:
+            while len(h)*(l/2)>n2+points[0].size-(n2/8) and l>1:
                 if x!=max(h_x_shift):
                     l-=1
                 else:
@@ -91,12 +103,14 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
             d.append(draw.Text(h,x=x,y=heigth-spacing,fontSize=l,fill=label_color))
         elif label_shortening=="clip":
             clip = draw.ClipPath()
-            clip.append(draw.Rectangle(x,heigth-spacing,spacing,label_size))
+            clip.append(draw.Rectangle(x,heigth-spacing,n2,label_size))
             d.append(draw.Text(h,x=x,y=heigth-spacing,fontSize=l,clip_path=clip,fill=label_color))
         elif label_shortening=="new_line":
-            if len(h)*(label_size/2)>spacing:
-                txt=[h[:int(spacing/(label_size/2))],h[int(spacing/(label_size/2)):]] 
-                while len(txt)*l>(l+spacing/8):
+            if len(h)*(label_size/2)>n2+points[0].size-(n2/8):
+                margin=int((n2+points[0].size-(n2/8))/(label_size/2))
+
+                txt=[h[x:x+margin] for x in range(0,len(h),margin)] 
+                while len(txt)*l>(l+n2/5) and l>1:
                     l-=1
             else:
                 txt=h                                                              
@@ -110,7 +124,7 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
                     color=subtag_colors[points[k].subtag]
                 else:
                     color=nodes_color
-                p = draw.Path(fill=color,stroke="white",opacity=0.5)           
+                p = draw.Path(fill=color,stroke=line_stroke_color,opacity=line_opacity,stroke_width=line_stroke_width)           
                 p.M(points[k].x+points[k].width,heigth-points[k].y)            
                 p.L(points[k].x+points[k].width,heigth-points[k].y+points[k].size)
               
@@ -179,35 +193,35 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
             l=label_size
             if label_shortening=="resize":
                 while len(txt)*(l/2)>spacing-(spacing/8):
-                    if node.x!=max([n.x for n in points]):
+                    if node.x!=max([n.x for n in points]) and l>1:
                         l-=1
                     else:
                         break
             elif label_shortening=="clip":
                 clip = draw.ClipPath()
-                clip.append(draw.Rectangle(node.x+node.width,heigth-node.y-(spacing/5),spacing-(spacing/8),node.size+2*(spacing/5)))
+                clip.append(draw.Rectangle(node.x+node.width,heigth-node.y-(spacing/5),n2-(n2/5),node.size+2*(spacing/5)))
             elif label_shortening=="new_line":
-                if len(txt)*(label_size/2)>spacing-2*(spacing/8):
-                    margin=int((spacing-2*(spacing/8))/(label_size/2))                    
+                if len(txt)*(label_size/2)>n2-2*(n2/8):
+                    margin=int((n2-2*(n2/8))/(label_size/2))                    
                     txt=[txt[x:x+margin] for x in range(0,len(txt),margin)]
-                    while len(txt)*l>node.size+2*(spacing/8):
+                    while len(txt)*l>node.size+2*(spacing/8) and l>1:
                         l-=1
 
 
             if label_position=="start_end":
                 if node.label not in [n.label for n in points][:node.index] or node.label not in [n.label for n in points][node.index+1:] and node.index<len(points) and node.x!=max([n.x for n in points]):
                     if label_shortening=="clip":
-                        label= draw.Text(txt,x=node.x+node.width+(spacing/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color,clip_path=clip)
+                        label= draw.Text(txt,x=node.x+node.width+(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color,clip_path=clip)
                     else:
-                        label= draw.Text(txt,x=node.x-(spacing/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color,text_anchor="end")
+                        label= draw.Text(txt,x=node.x-(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color,text_anchor="end")
 
                     
             elif label_position=="nodes":  
                 if label_shortening=="clip":        
                 
-                    label= draw.Text(txt,x=node.x+node.width+(spacing/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color,clip_path=clip)
+                    label= draw.Text(txt,x=node.x+node.width+(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color,clip_path=clip)
                 else:
-                    label= draw.Text(txt,x=node.x+node.width+(spacing/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color)
+                    label= draw.Text(txt,x=node.x+node.width+(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,fill=label_color)
             d.append(label)
 
     return d
