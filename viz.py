@@ -110,7 +110,7 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
                     color=subtag_colors[points[k].subtag]
                 else:
                     color=nodes_color
-                p = draw.Path(fill=color)           
+                p = draw.Path(fill=color,stroke="white",opacity=0.5)           
                 p.M(points[k].x+points[k].width,heigth-points[k].y)            
                 p.L(points[k].x+points[k].width,heigth-points[k].y+points[k].size)
               
