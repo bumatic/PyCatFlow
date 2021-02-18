@@ -15,7 +15,8 @@ def nodify(data,size,maxValue=10,sort_by="frequency"):
         for x in data.items():
             d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1],reverse=True)}
     else:
-        d=data
+        for x,y in data.items():
+            d[x]={k:v for k,v in sorted(y.items())}
 
     labels=[list(x[1].keys()) for x in d.items()]
     values=[[y[0] if type(y)==tuple else y for y in x[1].values()] for x in d.items()]
