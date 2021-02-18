@@ -188,7 +188,8 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
                 clip.append(draw.Rectangle(node.x+node.width,heigth-node.y-(spacing/5),spacing-(spacing/8),node.size+2*(spacing/5)))
             elif label_shortening=="new_line":
                 if len(txt)*(label_size/2)>spacing-2*(spacing/8):
-                    txt=[txt[:int((spacing-2*(spacing/8))/(label_size/2))],txt[int((spacing-2*(spacing/8))/(label_size/2)):]]
+                    margin=int((spacing-2*(spacing/8))/(label_size/2))                    
+                    txt=[txt[x:x+margin] for x in range(0,len(txt),margin)]
                     while len(txt)*l>node.size+2*(spacing/8):
                         l-=1
 
