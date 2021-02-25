@@ -179,6 +179,62 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
             else:
                 n_y_spacing=(spacing/3)
             n.y+=n_y_spacing  
+import drawSvg as draw
+from matplotlib import cm,colors
+import pycatflow as pcf
+
+def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag=True,nodes_color="gray",start_node_color="green",end_node_color="red",palette=None,show_labels=True,label_text="tag",label_color="black",label_size=5,label_shortening="clip",label_position="nodes",line_opacity=0.5,line_stroke_color="white",line_stroke_width=0.5,line_stroke_thick=0.5,legend=True):
+    headers=nodes[0]
+    
+    sequence=nodes[2]
+    
+    n_x_spacing=spacing
+    n_y_spacing=spacing+(spacing/5)
+    
+    points=[]
+    for n in nodes[1]:
+        
+        if n.index>0 and n.x==nodes[1][n.index-1].x:
+            n_y_spacing+=spacing/5+n.size
+        else:
+            n_y_spacing=spacing+(spacing/5)+n.size
+        if n.index>0 and n.x!=nodes[1][n.index-1].x:
+            n_x_spacing+=spacing
+            
+        points.append(pcf.Node(n.index,n.x+ n_x_spacing,n.y+n_y_spacing,n.size,n.value,n.width,n.label,n.subtag))
+    
+    
+    if width is None and heigth is None:
+        
+        width=spacing*4+max([x.x for x in points])
+        heigth=spacing*4+max([x.y for x in points])+((sum([x.size for x in points])/len(points))*len(set([x.subtag for x in points])))
+        
+    elif heigth is None:
+        heigth=spacing*4+max([x.y for x in points])+((sum([x.size for x in points])/len(points))*len(set([x.subtag for x in points])))
+        points=[pcf.Node(n.index,(n.x*(width-spacing*2)/max([x.x for x in points])),n.y,n.size,n.value,n.width,n.label,n.subtag) for n in points]
+        #spacing=points[1].x-(points[0].x+points[0].size)
+        
+    elif width is None:
+        width=spacing*4+max([x.x for x in points])
+        points=[pcf.Node(n.index,n.x,(n.y*(heigth-spacing*2)/max([x.y for x in points])),n.size,n.value,n.width,n.label,n.subtag) for n in points]
+        n_y_spacing=(spacing/3)
+        for n in points:
+            if n.index>0 and n.x==nodes[1][n.index-1].x:
+                n_y_spacing+=spacing/5
+            else:
+                n_y_spacing=(spacing/3)
+            n.y+=n_y_spacing
+
+        
+    else:  
+        points=[pcf.Node(n.index,(n.x*(width-spacing)/max([x.x for x in points])),(n.y*(heigth-spacing)/max([x.y for x in points])),n.size,n.value,n.width,n.label,n.subtag) for n in points]    
+        n_y_spacing=(spacing/3)
+        for n in points:
+            if n.index>0 and n.x==nodes[1][n.index-1].x:
+                n_y_spacing+=spacing/5
+            else:
+                n_y_spacing=(spacing/3)
+            n.y+=n_y_spacing  
 
     
     if palette is not None:
@@ -261,14 +317,14 @@ def genSVG(nodes,spacing,width=None,heigth=None,color_startEnd=True,color_subtag
                     
                 else:
                     xMedium=((points[n[1][n[1].index(k)+1]].x-(points[k].x+points[k].width))/2)+(points[k].x+points[k].width)
-                    yMedium=(((heigth-points[k].y+points[k].size)-(heigth-points[n[1][n[1].index(k)+1]].y+points[k].size))/2)+(heigth-points[n[1][n[1].index(k)+1]].y+points[k].size)
+                    yMedium=(((heigth-points[k].y+points[k].size)-(heigth-points[n[1][n[1].index(k)+1]].y+points[k].size))/2)+(heigth-points[n[1][n[1].index(k)+1]].y)
                     yMedium2=(((heigth-points[k].y)-(heigth-points[n[1][n[1].index(k)+1]].y))/2)+(heigth-points[n[1][n[1].index(k)+1]].y)
-                    p.Q(points[k].x+points[k].width+(spacing/2),heigth-points[k].y+points[k].size,xMedium,yMedium)                    
+                    p.Q(points[k].x+points[k].width+(spacing/2),heigth-points[k].y+points[k].size,xMedium+line_stroke_thick,yMedium+points[k].size)                    
                     #p.Q(points[k].x+points[k].width+(spacing/2),heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size,points[n[1][n[1].index(k)+1]].x,heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size)
                     p.T(points[n[1][n[1].index(k)+1]].x,heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size)
                     #p.L(points[n[1][n[1].index(k)+1]].x,heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size) 
                     p.L(points[n[1][n[1].index(k)+1]].x,heigth-points[n[1][n[1].index(k)+1]].y)
-                    p.Q(points[n[1][n[1].index(k)+1]].x-(spacing/2),heigth-points[n[1][n[1].index(k)+1]].y,xMedium,yMedium2)
+                    p.Q(points[n[1][n[1].index(k)+1]].x-(spacing/2),heigth-points[n[1][n[1].index(k)+1]].y,xMedium-line_stroke_thick,yMedium2)
                     #p.Q(points[k].x+points[k].width+(spacing/2),yMedium,points[k].x+points[k].width,points[k].y)
                     p.T(points[k].x+points[k].width,heigth-points[k].y)  
 
