@@ -13,10 +13,15 @@ def find_delimiter (data):
         l[d]=count
     return [k for k,v in l.items() if v== max(l.values())][0]
 
-def temporal_data(data,time_field,tag_field,subtag_field,orientation):
+def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field):
     new_data={}
     if orientation=='horizontal':
-        columns=sorted(set(data[time_field]))
+        if sort_field is None:
+            columns=sorted(set(data[time_field]))
+        else:
+            columns=[]
+            [columns.append(data[time_field][data[sort_field].index(x)]) for x in sorted(data[sort_field]) if x not in columns]
+            
         tags=data[tag_field]
         counts=[[x for x in tags].count(x) for x in tags]
         if subtag_field is not None:    
@@ -60,7 +65,7 @@ def temporal_data(data,time_field,tag_field,subtag_field,orientation):
 
 
 
-def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None):
+def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None):
     with open (filepath,"rb") as f:
         data=f.read()
     if delimiter is None:
@@ -73,10 +78,10 @@ def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,orientat
     for h in headers:
         data[h]=[l.split(delimiter)[headers.index(h)] for l in lines]
 
-    data=temporal_data(data,time_field,tag_field,subtag_field,orientation)
+    data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
     return data
 
-def read(data,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None,newLine=None):
+def read(data,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None,newLine=None):
     if type(data)==str:
         if delimiter is None:
             delimiter=find_delimiter(data)        
@@ -99,7 +104,7 @@ def read(data,time_field=None,tag_field=None,subtag_field=None,orientation="hori
             data[h]=[l[headers.index(h)] for l in lines]   
     
         
-    new_data=temporal_data(data,time_field,tag_field,subtag_field,orientation)
+    new_data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
     return new_data
         
         
