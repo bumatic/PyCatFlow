@@ -9,7 +9,7 @@ class Node:
         self.label=label
         self.subtag=subtag
 
-def nodify(data,size,maxValue=10,sort_by="frequency"):
+def nodify(data,size,minValue=0,maxValue=10,sort_by="frequency"):
     d={}
     if sort_by=="frequency":
         for x in data.items():
@@ -36,7 +36,7 @@ def nodify(data,size,maxValue=10,sort_by="frequency"):
         node_y=0
         for x,y,z in zip (l,v,s):
             #node_y+=y
-            nodes.append(Node(count,node_x,node_y,y*maxValue/m,y,size,x,z))
+            nodes.append(Node(count,node_x,node_y,y+minValue*(maxValue-minValue)/m,y,size,x,z))
 
             count+=1
            
