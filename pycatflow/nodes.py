@@ -47,7 +47,7 @@ def nodify(data,size,minValue=1,maxValue=10,sort_by="frequency",scaling="linear"
             if scaling=="linear":
                 nodes.append(Node(count,node_x,node_y,y+minValue*(maxValue-minValue)/m,y,size,x,z))
             elif scaling=="log":
-                nodes.append(Node(count,node_x,node_y,maxValue-minValue/math.log(m)*math.log(y)+minValue,y,size,x,z))
+                nodes.append(Node(count,node_x,node_y,(((maxValue-minValue)/math.log(m))*math.log(y))+minValue,y,size,x,z))
 
 
             count+=1
