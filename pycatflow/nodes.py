@@ -15,8 +15,14 @@ def nodify(data,size,minValue=1,maxValue=10,sort_by="frequency",scaling="linear"
     d={}
     if sort_by=="frequency":
         for x in data.items():
-            d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1],reverse=True)}
-    else:
+            if type(x[1][next(iter(x[1]))])==tuple:
+                d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1][0],reverse=True)}
+            else:
+                d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1],reverse=True)}
+    elif sort_by=="subtag":
+        for x in data.items():
+            d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1][1],reverse=True)}
+    elif sort_by=="alphabetical":
         for x,y in data.items():
             d[x]={k:v for k,v in sorted(y.items())}
 
