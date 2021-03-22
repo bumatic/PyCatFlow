@@ -275,7 +275,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             else:
                 symbol_y_shift=0
             
-            print(e)
+
 
 
 
