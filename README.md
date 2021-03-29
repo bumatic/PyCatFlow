@@ -9,13 +9,14 @@
 
 <h6>Functions</h6>
 
-**read_file(filepath,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None)**
+**read_file(filepath,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None,prefix="")**
 * **filepath**: any textual data format (csv,txt,tsv);
 * **time_field**: the name of the field with temporal data (leave None if orientation="vertical");
 * **tag_field**: the name of the field with the category;
 * **subtag_field**: the name of the field with the subcategory (optional);
 * **orientation**: horizontal if the temporal data are in one field, vertical if the temporal data are the name of  the fields;
 * **delimiter**: otpionally specify the delimiter, if None it will try to autodetect.
+* **prefix**: the prefix string that can be removed to sort the timefield as numbers or dates
 
 **read(data,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None,newLine=None)**
 * **data**: string with records divided by newLine and fields divided by delimiter; list of lists with the first element as list of headers; dictionary with headers as keys and values as lists;
@@ -25,6 +26,7 @@
 * **orientation**: horizontal if the temporal data are in one field, vertical if the temporal data are the name of  the fields;
 * **delimiter**: otpionally specify the delimiter, if None it will try to autodetect.
 * **newLine**: optionally define the newLine separator, by default \n.
+* **prefix**: the prefix string that can be removed to sort the timefield as numbers or dates
 
 **nodify(data,sort_by="frequency")**
 * **data**: output of the **read_file**/**read** functions, a dictionary with keys the temporal data, and values a dictionary with keys the categories and values or the frequency of the category or a tuple with the frequency and the subtag;
