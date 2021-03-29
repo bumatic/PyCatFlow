@@ -13,14 +13,41 @@ def find_delimiter (data):
         l[d]=count
     return [k for k,v in l.items() if v== max(l.values())][0]
 
-def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field):
+def typeDetect(data,prefix):
+    t1=[]
+    t2=[]
+    for x in data:
+        x=x.replace(prefix,"")
+        try:
+            t1.append(int(x))
+            t2.append("int")            
+        except ValueError:
+            try:
+                t1.append(float(x))
+                t2.append("float")
+            except ValueError:
+                from dateutil.parser import parse,ParserError
+                try:
+                    t1.append(parse(x))
+                    t2.append("date")
+                except ParserError:
+                    t1.append(x)
+                    t2.append("string")
+                    continue
+    t=[]
+    for k in set(t2):
+        [t.append(data[t1.index(h)]) for h in sorted([x for x,y in zip(t1,t2) if y==k]) if h not in t]
+    return t  
+
+def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,prefix):
     new_data={}
     if orientation=='horizontal':
         if sort_field is None:
-            columns=sorted(set(data[time_field]))
+            columns=typeDetect(data[time_field],prefix)
         else:
             columns=[]
-            [columns.append(data[time_field][data[sort_field].index(x)]) for x in sorted(data[sort_field]) if x not in columns]
+            n_sort_field=[int(x) for x in data[sort_field]]
+            [columns.append(data[time_field][n_sort_field.index(x)]) for x in sorted(n_sort_field) if x not in columns]
             
         tags=data[tag_field]
         counts=[[x for x in tags].count(x) for x in tags]
@@ -34,7 +61,8 @@ def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
                 new_data[l]={k: v for k, v in d.items()}
     else:
         if subtag_field is not None:
-            columns=sorted([x for x in data.keys() if not x.endswith(subtag_field)])
+            columns=typeDetect(list(data.keys()),prefix)
+            
             tags=[]
             for l in columns:
                 [tags.append(y) for y in data[l]]
@@ -44,7 +72,8 @@ def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
                 d={x:(z,y) for x,y,z in zip(data[l],data[l+subtag_field],data[l+"_count"])}
                 new_data[l]={k: v for k, v in d.items()}
         else:
-            columns=sorted(list(data.keys()))
+            types=typeDetect(list(data.keys()),prefix)
+            columns=typeDetect(list(data.keys()),prefix)
             tags=[]
             for l in columns:
                 [tags.append(y) for y in data[l]]
@@ -53,19 +82,10 @@ def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
                 data[l+"_count"]=[counts[tags.index(x)] for x in data[l]]
                 d={x:z for x,z in zip(data[l],data[l+"_count"])}
                 new_data[l]={k: v for k, v in d.items()}
-
         
     return new_data
 
-
-
-
-
-
-
-
-
-def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None):
+def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None,prefix=""):
     with open (filepath,"rb") as f:
         data=f.read()
     if delimiter is None:
@@ -78,10 +98,10 @@ def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,sort_fie
     for h in headers:
         data[h]=[l.split(delimiter)[headers.index(h)] for l in lines]
 
-    data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
+    data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,prefix)
     return data
 
-def read(data,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None,newLine=None):
+def read(data,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None,newLine=None,prefix=""):
     if type(data)==str:
         if delimiter is None:
             delimiter=find_delimiter(data)        
@@ -104,11 +124,5 @@ def read(data,time_field=None,tag_field=None,subtag_field=None,sort_field=None,o
             data[h]=[l[headers.index(h)] for l in lines]   
     
         
-    new_data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field)
+    new_data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,prefix)
     return new_data
-        
-        
-
-
-
-

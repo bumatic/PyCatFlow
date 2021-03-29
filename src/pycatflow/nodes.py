@@ -29,7 +29,6 @@ def nodify(data,sort_by="frequency"):
 
     labels=[list(x[1].keys()) for x in d.items()]
     values=[[y[0] if type(y)==tuple else y for y in x[1].values()] for x in d.items()]
-    #m=max([max([y[0] if type(y)==tuple else y for y in x[1].values()]) for x in d.items()] )
     subtags=[[y[1] if type(y)==tuple else "null" for y in x[1].values()] for x in d.items()]
     headers=list(d.keys())
     node_x=0

@@ -9,6 +9,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
     nodes2=copy.deepcopy(nodes[1])
     sequence=nodes[2]
 
+    #resizing of the nodes in relation to the canvas size and to the scaling option
     m=max([v.value for v in nodes[1]])
     new_nodes=[]
     if width is not None:
@@ -18,8 +19,6 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
     else:
         spacing2=spacing
     if heigth is not None:
-        #rows=max([[x.col_index for x in nodes[1]].count(y.col_index) for y in nodes[1]])
-        #med=m/len(nodes[1])
         l_col_index=[x.col_index for x in nodes2]
         l_col_index_max=max([l_col_index.count(y.col_index) for y in nodes2])
         sum_values=sum([x.value for x in nodes2 if l_col_index.count(x.col_index)==l_col_index_max])
@@ -40,18 +39,18 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             
         if n.col_index!=nodes2[n.index-1].col_index and n.index>0:
             node_x+=node_size
-        n.x+=node_x  
-
-        
-            
+        n.x+=node_x       
+          
         
         if node_scaling=="linear":
-            n.size=(((n.value+1)*maxValue)/m)-minValue
+            n.size=(((n.value+1)*maxValue)/m)+minValue
         elif node_scaling=="log":
             n.size=(((maxValue-minValue)/math.log(m))*math.log(n.value))+minValue
 
         new_nodes.append(n)
     
+
+    #positioning of the nodes on the canvas (x,y)
     n_x_spacing=spacing
     n_y_spacing=spacing+spacingy
     
@@ -70,7 +69,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
         points.append(pcf.Node(n.index,n.col_index,n.x+n_x_spacing,n.y+n_y_spacing,n.size,n.value,n.width,n.label,n.subtag))
         
     
-    
+    #sizing of the canvas
     if width is None and heigth is None:
         
         width=spacing*4+max([x.x for x in points])
@@ -85,7 +84,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
  
     
 
-    
+    #COLORS
     if palette is not None:
         palette=cm.get_cmap(palette[0],palette[1]).colors
         count=0
@@ -95,6 +94,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
                 count+=1
             subtag_colors[e]=colors.to_hex(palette[count])
     else:
+        #DEFAULT PALETTE: the number of colors is set in relation to the length of the subtags list
         palette=cm.get_cmap("Paired",len(set([n.subtag for n in points]))).colors
         
         count=0
@@ -183,8 +183,6 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
                      
 
     #nodes
-    #n_x_shift=spacing
-    #n_y_shift=spacing
     for node in points:
         if color_startEnd == True and color_subtag == True:
             if node.label not in [n.label for n in points][:node.index]:
@@ -204,8 +202,6 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             color=subtag_colors[node.subtag]
         elif color_startEnd == False and color_subtag == False:
             color=nodes_color
-        #if node.x!=points[node.index-1].x:
-            #n_x_shift+=spacing
         r = draw.Rectangle(node.x,heigth-node.y,node.width,node.size, fill=color,stroke="black")
         d.append(r)
 
@@ -219,8 +215,6 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             elif label_text=="tag_subtag":
                 txt=node.label+' ('+str(node.subtag)+')'  
             
-            #if len(txt)*(label_size/2)>spacing-2*(spacing/8):
-                #txt=[txt[:int((spacing-2*(spacing/8))/(label_size/2))],txt[int((spacing-2*(spacing/8))/(label_size/2)):]]
             l=label_size
             if label_shortening=="resize":
                 while len(txt)*(l/2)>spacing-(spacing/8):
