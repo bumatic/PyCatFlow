@@ -4,7 +4,17 @@ This package is a visualization tool which allows the representation of temporal
 
 ## Install 
 
-**Requirements:** The visualization and export is based on the **drawSvg** package; the color palettes are from **matplotlib**.
+Download the repository install the package by running the setup.py install routine:
+
+```python
+python3 setup.py install
+```
+
+Alternatively you can download the folder and place the pycatflow subfolder in your project directory. 
+
+**Requirements:** 
+- the visualization and export is based on the drawSvg package
+- the color palettes are from matplotlib
 
 
 ## Basic usage
@@ -22,7 +32,7 @@ viz.saveSvg('sample_viz.svg')
 viz
 ```
 
-This code and sample data are provided in the example folder. Running it creates this visualization.
+The code and sample data are provided in the example folder. Running it creates this visualization:
 
 ![Sample Visualization](example/sample_viz.svg)
 
