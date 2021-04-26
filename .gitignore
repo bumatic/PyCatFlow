@@ -1,4 +1,8 @@
 # Byte-compiled / optimized / DLL files
+
+tutorial/pycatflow
+**/.DS_Store
+
 __pycache__/
 *.py[cod]
 *$py.class

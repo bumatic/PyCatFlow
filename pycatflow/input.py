@@ -85,23 +85,65 @@ def temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,
         
     return new_data
 
-def read_file(filepath,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None,prefix=""):
+def read_file(filepath,time_field=None, tag_field=None,subtag_field=None, sort_field=None, orientation="horizontal",delimiter=None, newLine=None, prefix=""):
+    '''
+    Loads data from file and returns parsed data.
+    
+    Parameters:
+    filepath (str): Path to file
+    time_field (str): Name of the column with temporal data (leave None if orientation="vertical")
+    tag_field (str): Name of the column containing the categorical data / categories;
+    subtag_field (str): Name of the column containing optional subcategories;
+    sort_field (str): Optionally provide the name of a column determining the order of the time_field columns
+    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column;
+    delimiter (str): Otpionally specify the delimiter, if None it will try to autodetect
+    newLine (str): optionally define the newLine separator, by default \n
+
+    Returns:
+    
+    data (dict): Dictionary of loaded and parsed data. 
+    '''
+
+
     with open (filepath,"rb") as f:
         data=f.read()
     if delimiter is None:
         delimiter=find_delimiter(data)        
     else:
-        delimiter=delimiter    
+        delimiter=delimiter
+    if newLine is None:
+            newLine="\n"       
+    else:
+        newLine=newLine  
     headers=data.decode("utf-8-sig").split("\n")[0].split(delimiter)
     lines=data.decode("utf-8-sig").split("\n")[1:]
     data={}
     for h in headers:
-        data[h]=[l.split(delimiter)[headers.index(h)] for l in lines]
-
+        #data[h]=[l.split(delimiter)[headers.index(h)] for l in lines]
+        data[h.replace('\r', '')]=[l.split(delimiter)[headers.index(h)].replace('\r', '') for l in lines]
+    
     data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,prefix)
     return data
 
 def read(data,time_field=None,tag_field=None,subtag_field=None,sort_field=None,orientation="horizontal",delimiter=None,newLine=None,prefix=""):
+    '''
+    Parses a string into structured data for visualization.
+
+    Parameters:
+    read(data,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None,newLine=None)
+    data (str): String with records divided by newLine and fields divided by delimiter; list of lists with the first element as list of headers; dictionary with headers as keys and values as lists;
+    time_field (str): Name of the column with temporal data (leave None if orientation="vertical");
+    tag_field (str): Name of the column containing the categorical data / categories;
+    subtag_field (str): Name of the column containing optional subcategories;
+    sort_field (str): Optionally provide the name of a column determining the order of the time_field columns
+    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column;
+    delimiter (str): Otpionally specify the delimiter, if None it will try to autodetect
+    newLine (str): optionally define the newLine separator, by default \n
+
+    Returns:
+    data (dict): Dictionary of parsed data. 
+    '''
+
     if type(data)==str:
         if delimiter is None:
             delimiter=find_delimiter(data)        
@@ -121,8 +163,8 @@ def read(data,time_field=None,tag_field=None,subtag_field=None,sort_field=None,o
         lines=data[1:]
         data={}
         for h in headers:
-            data[h]=[l[headers.index(h)] for l in lines]   
+            #data[h]=[l[headers.index(h)] for l in lines]   
+            data[h.replace('\r', '')]=[l.split(delimiter)[headers.index(h)].replace('\r', '') for l in lines]
     
-        
-    new_data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,prefix)
-    return new_data
+    data=temporal_data(data,time_field,tag_field,subtag_field,orientation,sort_field,prefix)
+    return data

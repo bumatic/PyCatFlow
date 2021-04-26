@@ -1,0 +1,84 @@
+col_order	versions	permissions	app_review
+4	v1.0 [2011/06/06]	ads_management	No Review
+5	v1.0 [2012/05/17]	ads_management	No Review
+6	v1.0 [2013/06/24&25]	ads_management	No Review
+17	v2.10	ads_management	No Review
+18	v2.11	ads_management	No Review
+19	v2.12	ads_management	No Review
+11	v2.4	ads_management	No Review
+12	v2.5	ads_management	No Review
+13	v2.6	ads_management	No Review
+15	v2.8	ads_management	No Review
+16	v2.9	ads_management	No Review
+20	v3.0	ads_management	No Review
+21	v3.1	ads_management	Review
+22	v3.2	ads_management	Review
+23	v3.3	ads_management	Review
+24	v4.0	ads_management	Review
+25	v5.0	ads_management	Review
+26	v6.0	ads_management	Review
+17	v2.10	ads_read	No Review
+18	v2.11	ads_read	No Review
+19	v2.12	ads_read	No Review
+11	v2.4	ads_read	No Review
+12	v2.5	ads_read	No Review
+13	v2.6	ads_read	No Review
+15	v2.8	ads_read	No Review
+16	v2.9	ads_read	No Review
+20	v3.0	ads_read	No Review
+21	v3.1	ads_read	Review
+22	v3.2	ads_read	Review
+23	v3.3	ads_read	Review
+24	v4.0	ads_read	Review
+25	v5.0	ads_read	Review
+26	v6.0	ads_read	Review
+25	v5.0	attribution_read	Review
+26	v6.0	attribution_read	Review
+17	v2.10	business_management	Review
+18	v2.11	business_management	Review
+19	v2.12	business_management	Review
+15	v2.8	business_management	Review
+16	v2.9	business_management	Review
+20	v3.0	business_management	Review
+21	v3.1	business_management	Review
+22	v3.2	business_management	Review
+23	v3.3	business_management	Review
+24	v4.0	business_management	Review
+25	v5.0	business_management	Review
+26	v6.0	business_management	Review
+25	v5.0	catalog_management	Review
+26	v6.0	catalog_management	Review
+1	[2008/09/06]	create_event	No Review
+2	[2009/06/18]	create_event	No Review
+3	v1.0 [2010/05/05]	create_event	No Review
+4	v1.0 [2011/06/06]	create_event	No Review
+5	v1.0 [2012/05/17]	create_event	No Review
+6	v1.0 [2013/06/24&25]	create_event	No Review
+7	v2.0	create_event	Review
+1	[2008/09/06]	create_listing	No Review
+2	[2009/06/18]	create_note	No Review
+1	[2008/09/06]	email	No Review
+2	[2009/06/18]	email	No Review
+3	v1.0 [2010/05/05]	email	No Review
+4	v1.0 [2011/06/06]	email	No Review
+5	v1.0 [2012/05/17]	email	No Review
+6	v1.0 [2013/06/24&25]	email	No Review
+7	v2.0	email	No Review
+8	v2.1	email	No Review
+17	v2.10	email	No Review
+18	v2.11	email	No Review
+19	v2.12	email	No Review
+9	v2.2	email	No Review
+10	v2.3	email	No Review
+11	v2.4	email	No Review
+12	v2.5	email	No Review
+13	v2.6	email	No Review
+15	v2.8	email	No Review
+16	v2.9	email	No Review
+20	v3.0	email	No Review
+21	v3.1	email	No Review
+22	v3.2	email	No Review
+23	v3.3	email	No Review
+24	v4.0	email	No Review
+25	v5.0	email	No Review
+26	v6.0	email	No Review
