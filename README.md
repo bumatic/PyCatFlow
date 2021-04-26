@@ -37,6 +37,10 @@ The code and sample data are provided in the example folder. Running it creates 
 ![Sample Visualization](example/sample_viz.svg)
 
 
+## Credits
+
+PyCatFlow was conceptualized by Marcus Burkhardt and implemented by Herbert Natta (@herbertmn). It is inspired by the Rankflow visualization tool develped by Bernhard Rieder.
+
 ----------------------
 
 
