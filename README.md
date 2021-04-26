@@ -1,4 +1,13 @@
-# pycatflow
+# PyCatFlow
+
+
+
+```Python
+data=pcf.read_file("example_ordered.tsv","version/date","Permission (normalized)",subtag_field="(App) Review (normalized)", sort_field='order')
+nodes=pcf.nodify(data)
+viz = pcf.genSVG(nodes,50, 10)
+viz.savePng('order_test.png')
+```
 
 <h1>pycatflow</h1>
 

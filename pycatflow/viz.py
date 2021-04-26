@@ -4,10 +4,76 @@ import pycatflow as pcf
 import math
 import copy
 
+class Node:
+    def __init__(self,index,col_index,x,y,size,value,width,label,subtag):
+        self.x=x
+        self.index=index
+        self.col_index=col_index
+        self.y=y
+        self.size=size
+        self.value=value
+        self.width=width
+        self.label=label
+        self.subtag=subtag
+
+def nodify(data,sort_by="frequency"):
+    d={}
+    if sort_by=="frequency":
+        for x in data.items():
+            if type(x[1][next(iter(x[1]))])==tuple:
+                d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1][0],reverse=True)}
+            else:
+                d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1],reverse=True)}
+    elif sort_by=="subtag":
+        for x in data.items():
+            d[x[0]]={k: v for k, v in sorted(x[1].items(), key=lambda item: item[1][1],reverse=True)}
+    elif sort_by=="alphabetical":
+        for x,y in data.items():
+            d[x]={k:v for k,v in sorted(y.items())}
+
+    labels=[list(x[1].keys()) for x in d.items()]
+    values=[[y[0] if type(y)==tuple else y for y in x[1].values()] for x in d.items()]
+    subtags=[[y[1] if type(y)==tuple else "null" for y in x[1].values()] for x in d.items()]
+    headers=list(d.keys())
+    node_x=0
+    count=0
+    count2=0
+
+    nodes=[]
+    sequence={}
+
+    for l,v,s in zip (labels,values,subtags):
+        if count2<len(labels):
+            count2+=1  
+
+        for x,y,z in zip (l,v,s):
+            nodes.append(Node(count,count2,0,0,y,y,1,x,z))        
+
+
+            count+=1
+           
+    for n in nodes:
+        if n.label in sequence.keys():
+            sequence[n.label].append(n.index)
+        else:
+            sequence[n.label]=[]
+            sequence[n.label].append(n.index)
+    
+    return [headers,nodes,sequence]
+
+
 def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10,node_scaling="linear",color_startEnd=True,color_subtag=True,nodes_color="gray",start_node_color="green",end_node_color="red",palette=None,show_labels=True,label_text="tag",label_font="sans-serif",label_color="black",label_size=5,label_shortening="clip",label_position="nodes",line_opacity=0.5,line_stroke_color="white",line_stroke_width=0.5,line_stroke_thick=0.5,legend=True):
+    
     headers=nodes[0]
     nodes2=copy.deepcopy(nodes[1])
     sequence=nodes[2]
+
+    if start_node_color == "green":
+        start_node_color = "#4BA167"
+    if end_node_color == "red":
+        end_node_color = "#A04B83"
+    if nodes_color == "gray":
+        nodes_color = "#EAEBEE"
 
     #resizing of the nodes in relation to the canvas size and to the scaling option
     m=max([v.value for v in nodes[1]])
@@ -95,8 +161,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             subtag_colors[e]=colors.to_hex(palette[count])
     else:
         #DEFAULT PALETTE: the number of colors is set in relation to the length of the subtags list
-        palette=cm.get_cmap("Paired",len(set([n.subtag for n in points]))+1).colors
-        
+        palette=cm.get_cmap("tab20c",len(set([n.subtag for n in points]))+1).colors
         count=0
         subtag_colors={}
         for e in set([n.subtag for n in points]):
@@ -183,18 +248,25 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
                      
 
     #nodes
+    #return points
+    col_index_max = 0
+    for node in points:
+        if node.col_index > col_index_max:
+            col_index_max = node.col_index
+    
+
     for node in points:
         if color_startEnd == True and color_subtag == True:
             if node.label not in [n.label for n in points][:node.index]:
                 color=start_node_color
-            elif node.label not in [n.label for n in points][node.index+1:] and node.index<len(points):
+            elif node.label not in [n.label for n in points][node.index+1:] and node.col_index < col_index_max: #and node.index<len(points):
                 color=end_node_color
             else:
                 color=subtag_colors[node.subtag]
         elif color_startEnd == True and color_subtag == False:
             if node.label not in [n.label for n in points][:node.index]:
                 color=start_node_color
-            elif node.label not in [n.label for n in points][node.index+1:] and node.index<len(points):
+            elif node.label not in [n.label for n in points][node.index+1:] and node.col_index < col_index_max: #and node.index<len(points):
                 color=end_node_color
             else:
                 color=nodes_color
@@ -203,7 +275,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
         elif color_startEnd == False and color_subtag == False:
             color=nodes_color
         if node.label!='':
-            r = draw.Rectangle(node.x,heigth-node.y,node.width,node.size, fill=color,stroke="black")
+            r = draw.Rectangle(node.x,heigth-node.y,node.width,node.size, fill=color,stroke=color) #stroke="black"
             d.append(r)
 
 
@@ -252,8 +324,6 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
     
     #legend
     if color_subtag==True and legend==True:
-        
-        
         symbol_size=sum([x.size for x in points])/len(points)
         legend_heigth=(symbol_size+n2/5)*len(subtag_colors)
         legend_header=draw.Text("Legend",x=points[0].x,y=spacing+legend_heigth+spacingy,fontSize=label_size,font_family=label_font,fill=label_color)
@@ -261,7 +331,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
         symbol_y_shift=0
 
         for e in subtag_colors.items():            
-            symbol=draw.Rectangle(points[0].x,spacing+legend_heigth-n2/5-symbol_y_shift,points[0].width,symbol_size,fill=e[1],stroke="black")
+            symbol=draw.Rectangle(points[0].x,spacing+legend_heigth-n2/5-symbol_y_shift,points[0].width,symbol_size,fill=e[1],stroke=e[1]) #stroke="black"
             name=draw.Text(e[0],x=points[0].x+node.width+(n2/12),y=spacing+legend_heigth-n2/5-symbol_y_shift,fontSize=label_size,fill=label_color)
             d.append(symbol)
             d.append(name)
@@ -270,8 +340,45 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             else:
                 symbol_y_shift=0
             
-
-
-
-
     return d
+
+def visualize(data, spacing=50, node_size=10, width=None,heigth=None,minValue=1,maxValue=10,node_scaling="linear",color_startEnd=True,color_subtag=True,nodes_color="gray",start_node_color="green",end_node_color="red",palette=None,show_labels=True,label_text="tag",label_font="sans-serif",label_color="black",label_size=5,label_shortening="clip",label_position="nodes",line_opacity=0.5,line_stroke_color="white",line_stroke_width=0.5,line_stroke_thick=0.5,legend=True, sort_by="frequency"):
+    '''
+    Generates an SVG from data loaded via the read functions.
+
+    Parameters:
+    data: output of the read_file/read functions, a dictionary with keys the temporal data, and values a dictionary with keys the categories and values or the frequency of the category or a tuple with the frequency and the subtag;
+    spacing (int): the space between the nodes;
+    node_size (int): default node size
+    width (int): width of the visualization, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
+    height (int): height of the visualization, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
+    minValue (int): min size of a node 
+    maxValue (int): max size of a node
+    node_scaling (str): "linear" or ... " "
+    color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category;
+    color_subtag (bool): if True the nodes and the lines are colored depending by the subcategory;
+    nodes_color: the color of the nodes if the previous two options are false, used also for the lines and for the middle nodes in case of startEnd option;
+    start_node_color (): Defaults to "green"
+    end_node_color (): Defaults to "red"
+    palette: a tuple with the name of the matplotlib palette and the number of colors ("viridis",12);
+    show_labels (bool): Defaults to True
+    label_text (str): "tag" shows the category, "tag_count" shows the category and the frequency, "tag_subtag" shows the category and the subcategory;
+    label_font (str): Defaults to "sans-serif"
+    label_color (str): Defaults to "black"
+    label_size (int): Defaults to 5
+    label_shortening (str): "clip" cuts the text when it overlaps the margin; "resize" changes the size of the font to fit the available space; "new_line" wraps the text when it overlaps the margin and it rescale the size if the two lines overlaps the bottom margin;
+    label_position (str): "nodes" shows a label for each node, "start_end" shows a label for the first and last node of a sequence
+    line_opacity (float): Defaults to 0.5
+    line_stroke_color (str): Defaults to "white"
+    line_stroke_width (float): Defaults to 0.5
+    line_stroke_thick (float): Defaults to 0.5
+    legend (bool): If True a Legend is included
+    sort_by (str): "frequency" or "alphabetical" or "subtag"
+
+    Returns:
+    viz (drawSvg.drawing.Drawing)
+    '''
+
+    nodes = pcf.nodify(data, sort_by=sort_by)
+    viz = genSVG(nodes, spacing,node_size,width=width, heigth=heigth, minValue=minValue, maxValue= maxValue,node_scaling=node_scaling, color_startEnd=color_startEnd, color_subtag=color_subtag, nodes_color=nodes_color, start_node_color=start_node_color, end_node_color=end_node_color, palette=palette, show_labels=show_labels, label_text=label_text, label_font=label_font, label_color=label_color, label_size=label_size,label_shortening=label_shortening,label_position=label_position,line_opacity=line_opacity,line_stroke_color=line_stroke_color,line_stroke_width=line_stroke_width,line_stroke_thick=line_stroke_thick,legend=legend)
+    return viz
