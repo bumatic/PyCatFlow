@@ -95,7 +95,7 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             subtag_colors[e]=colors.to_hex(palette[count])
     else:
         #DEFAULT PALETTE: the number of colors is set in relation to the length of the subtags list
-        palette=cm.get_cmap("Paired",len(set([n.subtag for n in points]))).colors
+        palette=cm.get_cmap("Paired",len(set([n.subtag for n in points]))+1).colors
         
         count=0
         subtag_colors={}
@@ -202,8 +202,9 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
             color=subtag_colors[node.subtag]
         elif color_startEnd == False and color_subtag == False:
             color=nodes_color
-        r = draw.Rectangle(node.x,heigth-node.y,node.width,node.size, fill=color,stroke="black")
-        d.append(r)
+        if node.label!='':
+            r = draw.Rectangle(node.x,heigth-node.y,node.width,node.size, fill=color,stroke="black")
+            d.append(r)
 
 
         if show_labels==True:
