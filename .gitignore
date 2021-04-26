@@ -1,7 +1,7 @@
 # Byte-compiled / optimized / DLL files
 
-pycatflow.egg-info
-*.DS_Store
+
+**/.DS_Store
 
 __pycache__/
 *.py[cod]
