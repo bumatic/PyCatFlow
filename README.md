@@ -1,20 +1,34 @@
 # PyCatFlow
 
+This package is a visualization tool which allows the representation of temporal developments, based on categorical data.
 
+## Install 
+
+**Requirements:** The visualization and export is based on the **drawSvg** package; the color palettes are from **matplotlib**.
+
+
+## Basic usage
+
+The visualization library provides many functionalities for adjusting the visual output. It's simplest use is however as follows:
 
 ```Python
-data=pcf.read_file("example_ordered.tsv","version/date","Permission (normalized)",subtag_field="(App) Review (normalized)", sort_field='order')
-nodes=pcf.nodify(data)
-viz = pcf.genSVG(nodes,50, 10)
-viz.savePng('order_test.png')
+# Loading and parsing data:
+data = pcf.read_file("sample_data.tsv", time_field="versions", tag_field="permissions", subtag_field="app_review", sort_field="col_order")
+
+# Generating the visualization
+viz = pcf.visualize(data, 35, 10, width= 1200, heigth=250,label_size=4, label_shortening="resize")
+viz.savePng('sample_viz.png')
+viz.saveSvg('sample_viz.svg')
+viz
 ```
 
-<h1>pycatflow</h1>
+This code and sample data are provided in the example folder. Running it creates this visualization.
 
-<p>This package is a visualization tool which allows the representation of temporal developments, based on categorical data.</p>
+![Sample Visualization](example/sample_viz.svg)
 
-<h6>Requirements</h6>
-<p>The visualization and export stands on the **drawSvg** package; the colour palettes are from **matplotlib**</p>
+
+----------------------
+
 
 <h6>Functions</h6>
 
