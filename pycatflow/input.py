@@ -117,6 +117,7 @@ def read_file(filepath,time_field=None, tag_field=None,subtag_field=None, sort_f
         newLine=newLine  
     headers=data.decode("utf-8-sig").split("\n")[0].split(delimiter)
     lines=data.decode("utf-8-sig").split("\n")[1:]
+    lines=[l for l in lines if l!='']
     data={}
     for h in headers:
         #data[h]=[l.split(delimiter)[headers.index(h)] for l in lines]
