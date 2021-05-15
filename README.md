@@ -23,10 +23,11 @@ The visualization library provides many functionalities for adjusting the visual
 
 ```Python
 # Loading and parsing data:
-data = pcf.read_file("sample_data.tsv", time_field="versions", tag_field="permissions", subtag_field="app_review", sort_field="col_order")
+data = pcf.read_file("sample_data.tsv", columns="versions", nodes="permissions", categories="app_review",
+                     column_order="col_order")
 
 # Generating the visualization
-viz = pcf.visualize(data, 35, 10, width= 1200, heigth=250,label_size=4, label_shortening="resize")
+viz = pcf.visualize(data, 35, 10, width=1200, heigth=250, label_size=4, label_shortening="resize")
 viz.savePng('sample_viz.png')
 viz.saveSvg('sample_viz.svg')
 viz
