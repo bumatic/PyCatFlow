@@ -305,38 +305,40 @@ def genSVG(nodes,spacing,node_size,width=None,heigth=None,minValue=1,maxValue=10
                     while len(txt)*l>node.size+2*(spacing/8) and l>1:
                         l-=1
 
-
+            label_pos_y = heigth-node.y+(node.size/2)-(l/2)
             if label_position=="start_end":
                 if node.label not in [n.label for n in points][:node.index] or node.label not in [n.label for n in points][node.index+1:] and node.index<len(points) and node.x!=max([n.x for n in points]):
                     if label_shortening=="clip":
-                        label= draw.Text(txt,x=node.x+node.width+(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,font_family=label_font,fill=label_color,clip_path=clip)
+                        label= draw.Text(txt,x=node.x+node.width+(n2/8),y=label_pos_y,fontSize=l,font_family=label_font,fill=label_color,clip_path=clip)
                     else:
-                        label= draw.Text(txt,x=node.x-(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,font_family=label_font,fill=label_color,text_anchor="end")
+                        label= draw.Text(txt,x=node.x-(n2/8),y=label_pos_y,fontSize=l,font_family=label_font,fill=label_color,text_anchor="end")
 
                     
             elif label_position=="nodes":  
                 if label_shortening=="clip":        
                 
-                    label= draw.Text(txt,x=node.x+node.width+(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,font_family=label_font,fill=label_color,clip_path=clip)
+                    label= draw.Text(txt,x=node.x+node.width+(n2/8),y=label_pos_y,fontSize=l,font_family=label_font,fill=label_color,clip_path=clip)
                 else:
-                    label= draw.Text(txt,x=node.x+node.width+(n2/8),y=heigth-node.y+(node.size/2),fontSize=l,font_family=label_font,fill=label_color)
+                    label= draw.Text(txt,x=node.x+node.width+(n2/8),y=label_pos_y,fontSize=l,font_family=label_font,fill=label_color)
             d.append(label)
     
     #legend
     if color_subtag==True and legend==True:
+        offset = spacing
         symbol_size=sum([x.size for x in points])/len(points)
-        legend_heigth=(symbol_size+n2/5)*len(subtag_colors)
-        legend_header=draw.Text("Legend",x=points[0].x,y=spacing+legend_heigth+spacingy,fontSize=label_size,font_family=label_font,fill=label_color)
+        legend_heigth=(symbol_size+offset)*len(subtag_colors)
+        legend_header_y = spacing + legend_heigth + (spacing*1.5)
+        legend_header=draw.Text("Legend", x=points[0].x, y=legend_header_y,fontSize=label_size,font_family=label_font,fill=label_color)
         d.append(legend_header)
         symbol_y_shift=0
-
-        for e in subtag_colors.items():            
-            symbol=draw.Rectangle(points[0].x,spacing+legend_heigth-n2/5-symbol_y_shift,points[0].width,symbol_size,fill=e[1],stroke=e[1]) #stroke="black"
-            name=draw.Text(e[0],x=points[0].x+node.width+(n2/12),y=spacing+legend_heigth-n2/5-symbol_y_shift,fontSize=label_size,fill=label_color)
+        for e in subtag_colors.items():
+            legend_label_y = spacing + legend_heigth + (symbol_size/2) - (label_size/2) - offset - symbol_y_shift
+            symbol=draw.Rectangle(points[0].x, spacing+legend_heigth-offset-symbol_y_shift, points[0].width, symbol_size,fill=e[1],stroke=e[1]) #stroke="black"
+            name=draw.Text(e[0],x=points[0].x+node.width+(n2/12),y=legend_label_y,fontSize=label_size,fill=label_color)
             d.append(symbol)
             d.append(name)
-            if spacing+legend_heigth-n2/5-symbol_y_shift>spacing:
-                symbol_y_shift+=n2/5+symbol_size
+            if spacing+legend_heigth-(offset)-symbol_y_shift>spacing:
+                symbol_y_shift+=offset+symbol_size
             else:
                 symbol_y_shift=0
             
