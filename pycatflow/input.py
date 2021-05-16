@@ -41,28 +41,28 @@ def detect_dtype(data, prefix):
     return t  
 
 
-def temporal_data(data, time_field, tag_field, subtag_field, orientation, sort_field, prefix):
+def prepare_data(data, columns_data, node_data, category_data, orientation, sort_field, prefix):
     new_data = {}
     if orientation == 'horizontal':
         if sort_field is None:
-            columns = detect_dtype(data[time_field], prefix)
+            columns = detect_dtype(data[columns_data], prefix)
         else:
             columns = []
             n_sort_field = [int(x) for x in data[sort_field]]
-            [columns.append(data[time_field][n_sort_field.index(x)]) for x in sorted(n_sort_field) if x not in columns]
+            [columns.append(data[columns_data][n_sort_field.index(x)]) for x in sorted(n_sort_field) if x not in columns]
             
-        tags = data[tag_field]
+        tags = data[node_data]
         counts = [[x for x in tags].count(x) for x in tags]
-        if subtag_field is not None:    
+        if category_data is not None:
             for l in columns:
-                d = {x: (z, y) for t, x, y, z in zip(data[time_field], tags, data[subtag_field], counts) if l == t}
+                d = {x: (z, y) for t, x, y, z in zip(data[columns_data], tags, data[category_data], counts) if l == t}
                 new_data[l] = {k: v for k, v in d.items()}
         else:
             for l in columns:
-                d = {x: z for t, x, z in zip(data[time_field], tags, counts) if l == t}
+                d = {x: z for t, x, z in zip(data[columns_data], tags, counts) if l == t}
                 new_data[l] = {k: v for k, v in d.items()}
     else:
-        if subtag_field is not None:
+        if category_data is not None:
             columns = detect_dtype(list(data.keys()), prefix)
             
             tags = []
@@ -71,7 +71,7 @@ def temporal_data(data, time_field, tag_field, subtag_field, orientation, sort_f
             counts = [[x for x in tags].count(x) for x in tags]
             for l in columns:
                 data[l+"_count"] = [counts[tags.index(x)] for x in data[l]]
-                d = {x: (z, y) for x, y, z in zip(data[l], data[l+subtag_field], data[l+"_count"])}
+                d = {x: (z, y) for x, y, z in zip(data[l], data[l + category_data], data[l + "_count"])}
                 new_data[l] = {k: v for k, v in d.items()}
         else:
             types = detect_dtype(list(data.keys()), prefix)
@@ -131,7 +131,7 @@ def read_file(filepath,
     for h in headers:
         data[h.replace('\r', '')] = [line.split(delimiter)[headers.index(h)].replace('\r', '') for line in lines]
     
-    data = temporal_data(data, columns, nodes, categories, orientation, column_order, prefix)
+    data = prepare_data(data, columns, nodes, categories, orientation, column_order, prefix)
     return data
 
 
@@ -148,7 +148,8 @@ def read(data,
     Parses a string into structured data for visualization.
 
     Parameters:
-    read(data,time_field=None,tag_field=None,subtag_field=None,orientation="horizontal",delimiter=None,line_delimiter=None)
+    read(data, columns=None, nodes=None, categories=None, column_order=None, orientation="horizontal",
+    delimiter=None, line_delimiter=None)
     data (str): String with records divided by line_delimiter and fields divided by delimiter; list of lists with the first element as list of headers; dictionary with headers as keys and values as lists;
     columns (str): Name of the column with temporal data (leave None if orientation="vertical");
     nodes (str): Name of the column containing the node data;
@@ -183,5 +184,5 @@ def read(data,
         for h in headers:
             data[h.replace('\r', '')] = [line.split(delimiter)[headers.index(h)].replace('\r', '') for line in lines]
     
-    data = temporal_data(data, columns, nodes, categories, orientation, column_order, prefix)
+    data = prepare_data(data, columns, nodes, categories, orientation, column_order, prefix)
     return data

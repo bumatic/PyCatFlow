@@ -27,7 +27,7 @@ data = pcf.read_file("sample_data.tsv", columns="versions", nodes="permissions",
                      column_order="col_order")
 
 # Generating the visualization
-viz = pcf.visualize(data, 35, 10, width=1200, heigth=250, label_size=4, label_shortening="resize")
+viz = pcf.visualize(data, 35, 10, width=1200, height=250, label_size=4, label_shortening="resize")
 viz.savePng('sample_viz.png')
 viz.saveSvg('sample_viz.svg')
 viz
