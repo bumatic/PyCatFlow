@@ -1,4 +1,13 @@
 def find_delimiter(data):
+    """
+    This function finds and returns the delimiter of the given data.
+
+    Parameters:
+    data (string): data in which to look for the used delimiter
+
+    Returns:
+    (string): delimiter used in given data
+    """
     if type(data) == str:
         headers = data.split("\n")[0]
     else:
@@ -15,6 +24,16 @@ def find_delimiter(data):
 
 
 def detect_dtype(data, prefix):
+    """
+    Transforms objects inside data into the correct datatypes and returns a sorted and duplicate-free list.
+
+    Parameters:
+    data (list): a single column
+    prefix (str): delete an unwanted prefix out of the data
+
+    Returns:
+    (list): original data without duplicates in correct datatypes
+    """
     t1 = []
     t2 = []
     for x in data:
@@ -42,6 +61,21 @@ def detect_dtype(data, prefix):
 
 
 def prepare_data(data, columns_data, node_data, category_data, orientation, sort_field, prefix):
+    """
+    Arranges the data into a new format to make is usable for the flow visualisation.
+
+    Parameters:
+    data (dict): original data transformed to a dict
+    columns_data (str): Name of the column with temporal data (None if orientation="vertical")
+    node_data (str): which column to use as nodes in the graph 
+    category_data (str): Name of the column containing optional categories of nodes
+    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column
+    sort_field (str): Optionally provide the name of a column determining the order of the time_field columns
+    prefix (str): delete an unwanted prefix out of the data
+
+    Returns:
+    (dict): Dictionary of parsed data
+    """
     new_data = {}
     if orientation == 'horizontal':
         if sort_field is None:
@@ -97,21 +131,21 @@ def read_file(filepath,
               line_delimiter=None,
               prefix=""):
     """
-    Loads data from file and returns parsed data.
+    Loads data from file and returns structured data for visualisation.
     
     Parameters:
     filepath (str): Path to file
-    time_field (str): Name of the column with temporal data (leave None if orientation="vertical")
-    tag_field (str): Name of the column containing the categorical data / categories;
-    subtag_field (str): Name of the column containing optional subcategories;
-    sort_field (str): Optionally provide the name of a column determining the order of the time_field columns
-    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column;
-    delimiter (str): Optionally specify the delimiter, if None it will try to autodetect;
+    columns (str): Name of the column with temporal data (leave None if orientation="vertical")
+    nodes (str): Name of the column containing the node data
+    categories (str): Name of the column containing optional categories of nodes
+    column_order (str): Optionally provide the name of a column determining the order of the columns
+    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column
+    delimiter (str): Otpionally specify the delimiter, if None it will try to autodetect
     line_delimiter (str): optionally define the line_delimiter separator, by default \n
+    prefix (str): delete an unwanted prefix out of the data
 
     Returns:
-    
-    data (dict): Dictionary of loaded and parsed data. 
+    (dict): Dictionary of parsed data
     """
 
     with open(filepath, "rb") as f:
@@ -148,19 +182,18 @@ def read(data,
     Parses a string into structured data for visualization.
 
     Parameters:
-    read(data, columns=None, nodes=None, categories=None, column_order=None, orientation="horizontal",
-    delimiter=None, line_delimiter=None)
-    data (str): String with records divided by line_delimiter and fields divided by delimiter; list of lists with the first element as list of headers; dictionary with headers as keys and values as lists;
-    columns (str): Name of the column with temporal data (leave None if orientation="vertical");
-    nodes (str): Name of the column containing the node data;
-    categories (str): Name of the column containing optional categories of nodes;
-    column_order (str): Optionally provide the name of a column determining the order of the columns;
-    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column;
+    data (str): String with records divided by line_delimiter and fields divided by delimiter; list of lists with the first element as list of headers; dictionary with headers as keys and values as lists
+    columns (str): Name of the column with temporal data (leave None if orientation="vertical")
+    nodes (str): Name of the column containing the node data
+    categories (str): Name of the column containing optional categories of nodes
+    column_order (str): Optionally provide the name of a column determining the order of the columns
+    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column
     delimiter (str): Otpionally specify the delimiter, if None it will try to autodetect
     line_delimiter (str): optionally define the line_delimiter separator, by default \n
+    prefix (str): delete an unwanted prefix out of the data
 
     Returns:
-    data (dict): Dictionary of parsed data. 
+    (dict): Dictionary of parsed data
     """
 
     if type(data) == str:

@@ -20,6 +20,16 @@ class Node:
 
 
 def nodify(data, sort_by="frequency"):
+    """
+    Takes data and creates a list containing information about the nodes for the graph.
+
+    Parameters:
+    data (dict): output of the read_file/read functions, a dictionary with keys the temporal data, and values a dictionary with keys of the item and values or the frequency of the item or a tuple with the frequency and the category
+    sort_by (str): "frequency" or "alphabetical" or "category", defaults to "frequency"
+
+    Returns:
+    (list): A list containing information about the nodes for the graph
+    """
     d = {}
     if sort_by == "frequency":
         for item in data.items():
@@ -71,7 +81,40 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
            end_node_color="red", palette=None, show_labels=True, label_text="item", label_font="sans-serif",
            label_color="black", label_size=5, label_shortening="clip", label_position="nodes", line_opacity=0.5,
            line_stroke_color="white", line_stroke_width=0.5, line_stroke_thick=0.5, legend=True):
-    
+    """
+    Generates an SVG from data loaded via the read functions.
+
+    Parameters:
+    nodes (list): The output of nodify(), a list containingg information about the nodes for the graph
+    spacing (int): the space between the nodes, defaults to 50
+    node_size (int): default node size, defauults to 10
+    width (int): width of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
+    height (int): height of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
+    minValue (int): min size of a node , defaults to 1
+    maxValue (int): max size of a node, defaults to 10
+    node_scaling (str): "linear" or ... " ", defaults to "linear"
+    color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category, defaults to True
+    color_categories (bool): if True the nodes and the lines are colored depending by the subcategory, deafults to True
+    nodes_color (str): the color of the nodes if the previous two options are false, defaults to "gray", used also for the lines and for the middle nodes in case of startEnd option
+    start_node_color (str): Defaults to "green"
+    end_node_color (str): Defaults to "red"
+    palette (tuple): a tuple with the name of the matplotlib palette and the number of colors ("viridis",12), defaults to None
+    show_labels (bool): Defaults to True
+    label_text (str): "item" shows the category, defaults to "item", "item_count" shows the category and the frequency, "item_category" shows the category and the subcategory
+    label_font (str): Defaults to "sans-serif"
+    label_color (str): Defaults to "black"
+    label_size (int): Defaults to 5
+    label_shortening (str): defaults to "clip", "clip" cuts the text when it overlaps the margin, "resize" changes the size of the font to fit the available space, "new_line" wraps the text when it overlaps the margin and it rescale the size if the two lines overlaps the bottom margin
+    label_position (str): defaults to "nodes", "nodes" shows a label for each node, "start_end" shows a label for the first and last node of a sequence
+    line_opacity (float): Defaults to 0.5
+    line_stroke_color (str): Defaults to "white"
+    line_stroke_width (float): Defaults to 0.5
+    line_stroke_thick (float): Defaults to 0.5
+    legend (bool): If True a Legend is included, defaults to True
+
+    Returns:
+    (drawSvg.drawing.Drawing): The finished graph
+    """ 
     headers = nodes[0]
     nodes2 = copy.deepcopy(nodes[1])
     sequence = nodes[2]
@@ -367,36 +410,36 @@ def visualize(data, spacing=50, node_size=10, width=None, height=None, minValue=
     Generates an SVG from data loaded via the read functions.
 
     Parameters:
-    data: output of the read_file/read functions, a dictionary with keys the temporal data, and values a dictionary with keys of the item and values or the frequency of the item or a tuple with the frequency and the category;
-    spacing (int): the space between the nodes;
-    node_size (int): default node size
-    width (int): width of the visualization, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
-    height (int): height of the visualization, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
-    minValue (int): min size of a node 
-    maxValue (int): max size of a node
-    node_scaling (str): "linear" or ... " "
-    color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category;
-    color_categories (bool): if True the nodes and the lines are colored depending by the subcategory;
-    nodes_color: the color of the nodes if the previous two options are false, used also for the lines and for the middle nodes in case of startEnd option;
-    start_node_color (): Defaults to "green"
-    end_node_color (): Defaults to "red"
-    palette: a tuple with the name of the matplotlib palette and the number of colors ("viridis",12);
+    data (dict): output of the read_file/read functions, a dictionary with keys the temporal data, and values a dictionary with keys of the item and values or the frequency of the item or a tuple with the frequency and the category
+    spacing (int): the space between the nodes, defaults to 50
+    node_size (int): default node size, defauults to 10
+    width (int): width of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
+    height (int): height of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
+    minValue (int): min size of a node , defaults to 1
+    maxValue (int): max size of a node, defaults to 10
+    node_scaling (str): "linear" or ... " ", defaults to "linear"
+    color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category, defaults to True
+    color_categories (bool): if True the nodes and the lines are colored depending by the subcategory, deafults to True
+    nodes_color (str): the color of the nodes if the previous two options are false, defaults to "gray", used also for the lines and for the middle nodes in case of startEnd option
+    start_node_color (str): Defaults to "green"
+    end_node_color (str): Defaults to "red"
+    palette (tuple): a tuple with the name of the matplotlib palette and the number of colors ("viridis",12), defaults to None
     show_labels (bool): Defaults to True
-    label_text (str): "item" shows the category, "item_count" shows the category and the frequency, "item_category" shows the category and the subcategory;
+    label_text (str): "item" shows the category, defaults to "item", "item_count" shows the category and the frequency, "item_category" shows the category and the subcategory
     label_font (str): Defaults to "sans-serif"
     label_color (str): Defaults to "black"
     label_size (int): Defaults to 5
-    label_shortening (str): "clip" cuts the text when it overlaps the margin; "resize" changes the size of the font to fit the available space; "new_line" wraps the text when it overlaps the margin and it rescale the size if the two lines overlaps the bottom margin;
-    label_position (str): "nodes" shows a label for each node, "start_end" shows a label for the first and last node of a sequence
+    label_shortening (str): defaults to "clip", "clip" cuts the text when it overlaps the margin, "resize" changes the size of the font to fit the available space, "new_line" wraps the text when it overlaps the margin and it rescale the size if the two lines overlaps the bottom margin
+    label_position (str): defaults to "nodes", "nodes" shows a label for each node, "start_end" shows a label for the first and last node of a sequence
     line_opacity (float): Defaults to 0.5
     line_stroke_color (str): Defaults to "white"
     line_stroke_width (float): Defaults to 0.5
     line_stroke_thick (float): Defaults to 0.5
-    legend (bool): If True a Legend is included
-    sort_by (str): "frequency" or "alphabetical" or "category"
+    legend (bool): If True a Legend is included, defaults to True
+    sort_by (str): "frequency" or "alphabetical" or "category", defaults to "frequency"
 
     Returns:
-    viz (drawSvg.drawing.Drawing)
+    (drawSvg.drawing.Drawing): The finished graph
     """
 
     nodes = pcf.nodify(data, sort_by=sort_by)
