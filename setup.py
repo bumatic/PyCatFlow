@@ -4,14 +4,15 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pycatflow", # Replace with your own username
-    version="0.0.1",
-    author="Digital Methods Tool Lab",
+    name="pycatflow", 
+    version="0.0.2",
+    author="Marcus Burkhardt",
     author_email="marcus.burkhardt@gmail.com",
-    description="A visualization tool which allows the representation of temporal developments, based on categorical data.",
-    long_description="PyCatFlow was conceptualized by Marcus Burkhardt and implemented by Herbert Natta (Email: herbert.natta@gmail.com, Github: @herbertmn). It is inspired by the Rankflow visualization tool develped by Bernhard Rieder.",
+    description="A tool for visualizing temporal developments of categorical data.",
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bumatic/PyCatFlow",
+    license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

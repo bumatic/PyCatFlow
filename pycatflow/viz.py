@@ -245,38 +245,32 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
     
     # lines
     for n in sequence.items():        
-        if len(n[1])>1:            
+        if len(n[1]) > 1:
             for k in n[1][:-1]:
                 if color_categories:
                     color = category_colors[points[k].category]
                 else:
                     color = nodes_color
-                p = draw.Path(fill=color,stroke=line_stroke_color,opacity=line_opacity,stroke_width=line_stroke_width)           
+                p = draw.Path(fill=color, stroke=line_stroke_color, opacity=line_opacity, stroke_width=line_stroke_width)
                 p.M(points[k].x + points[k].width, height - points[k].y)
                 p.L(points[k].x + points[k].width, height - points[k].y + points[k].size)
-              
-            
-                if points[k].y==points[n[1][n[1].index(k)+1]].y:
+
+                if points[k].y == points[n[1][n[1].index(k)+1]].y:
                     p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y + points[k].size)
                     p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y)
                     
                 else:
-                    xMedium=((points[n[1][n[1].index(k)+1]].x-(points[k].x+points[k].width))/2)+(points[k].x+points[k].width)
-                    yMedium= (((height - points[k].y + points[k].size) - (height - points[n[1][n[1].index(k) + 1]].y + points[k].size)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
-                    yMedium2= (((height - points[k].y) - (height - points[n[1][n[1].index(k) + 1]].y)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
+                    xMedium = ((points[n[1][n[1].index(k)+1]].x-(points[k].x+points[k].width))/2)+(points[k].x+points[k].width)
+                    yMedium = (((height - points[k].y + points[k].size) - (height - points[n[1][n[1].index(k) + 1]].y + points[k].size)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
+                    yMedium2 = (((height - points[k].y) - (height - points[n[1][n[1].index(k) + 1]].y)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
                     p.Q(points[k].x + points[k].width + (spacing/2), height - points[k].y + points[k].size, xMedium + line_stroke_thick, yMedium + points[k].size)
-                    #p.Q(points[k].x+points[k].width+(spacing/2),heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size,points[n[1][n[1].index(k)+1]].x,heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size)
                     p.T(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y + points[n[1][n[1].index(k) + 1]].size)
-                    #p.L(points[n[1][n[1].index(k)+1]].x,heigth-points[n[1][n[1].index(k)+1]].y+points[n[1][n[1].index(k)+1]].size) 
                     p.L(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y)
                     p.Q(points[n[1][n[1].index(k)+1]].x - (spacing/2), height - points[n[1][n[1].index(k) + 1]].y, xMedium - line_stroke_thick, yMedium2)
-                    #p.Q(points[k].x+points[k].width+(spacing/2),yMedium,points[k].x+points[k].width,points[k].y)
                     p.T(points[k].x + points[k].width, height - points[k].y)
 
-                                  
                 p.Z()
-                d.append(p)       
-                     
+                d.append(p)
 
     # nodes
     # return points
