@@ -56,7 +56,7 @@ Running the above code creates this visualization:
 
 ## Credits & License
 
-PyCatFlow was conceptualized by Marcus Burkhardt and implemented by Herbert Natta (@herbertmn). It is inspired by the Rankflow visualization tool develped by Bernhard Rieder. 
+PyCatFlow was conceptualized by Marcus Burkhardt and implemented by Herbert Natta ([@herbertmn](https://github.com/herbertmn)). It is inspired by the Rankflow visualization tool develped by Bernhard Rieder. 
 
 The package is released under MIT License.
 
