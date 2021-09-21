@@ -51,7 +51,7 @@ developed and maintained by Gunther Cox.
 
 Running the above code creates this visualization:
 
-![Sample Visualization](https://github.com/bumatic/PyCatFlow/blob/main/example/sample_viz.svg)
+![Sample Visualization](https://raw.githubusercontent.com/bumatic/PyCatFlow/main/example/sample_viz.svg)
 
 
 ## Credits & License
