@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Marcus Burkhardt",
     author_email="marcus.burkhardt@gmail.com",
-    description="A tool for visualizing temporal developments of categorical data.",
+    description="A tool for visualizing categorical data over time.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bumatic/PyCatFlow",
