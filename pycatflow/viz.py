@@ -77,8 +77,8 @@ def nodify(data, sort_by="frequency"):
 
 
 def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxValue=10, node_scaling="linear",
-           color_startEnd=True, color_categories=True, nodes_color="gray", start_node_color="green",
-           end_node_color="red", palette=None, show_labels=True, label_text="item", label_font="sans-serif",
+           connection_type="semi-curved", color_startEnd=True, color_categories=True, nodes_color="gray",
+           start_node_color="green", end_node_color="red", palette=None, show_labels=True, label_text="item", label_font="sans-serif",
            label_color="black", label_size=5, label_shortening="clip", label_position="nodes", line_opacity=0.5,
            line_stroke_color="white", line_stroke_width=0.5, line_stroke_thick=0.5, legend=True):
     """
@@ -93,6 +93,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
     minValue (int): min size of a node , defaults to 1
     maxValue (int): max size of a node, defaults to 10
     node_scaling (str): "linear" or ... " ", defaults to "linear"
+    connection_type (str): "semi-curved" or "curved" or "linear", defaults to "semi-curved"
     color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category, defaults to True
     color_categories (bool): if True the nodes and the lines are colored depending by the subcategory, deafults to True
     nodes_color (str): the color of the nodes if the previous two options are false, defaults to "gray", used also for the lines and for the middle nodes in case of startEnd option
@@ -251,26 +252,116 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     color = category_colors[points[k].category]
                 else:
                     color = nodes_color
-                p = draw.Path(fill=color, stroke=line_stroke_color, opacity=line_opacity, stroke_width=line_stroke_width)
-                p.M(points[k].x + points[k].width, height - points[k].y)
-                p.L(points[k].x + points[k].width, height - points[k].y + points[k].size)
+                if connection_type.lower() == "semi-curved":
+                    p = draw.Path(fill=color, stroke=line_stroke_color, opacity=line_opacity, stroke_width=line_stroke_width)
+                    p.M(points[k].x + points[k].width, height - points[k].y)
+                    p.L(points[k].x + points[k].width, height - points[k].y + points[k].size)
 
-                if points[k].y == points[n[1][n[1].index(k)+1]].y:
-                    p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y + points[k].size)
-                    p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y)
-                    
+                    if points[k].y == points[n[1][n[1].index(k)+1]].y:
+                        p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y + points[k].size)
+                        p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y)
+
+                    else:
+                        xMedium = ((points[n[1][n[1].index(k)+1]].x-(points[k].x+points[k].width))/2)+(points[k].x+points[k].width)
+                        yMedium = (((height - points[k].y + points[k].size) - (height - points[n[1][n[1].index(k) + 1]].y + points[k].size)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
+                        yMedium2 = (((height - points[k].y) - (height - points[n[1][n[1].index(k) + 1]].y)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
+                        p.Q(points[k].x + points[k].width + (spacing/2), height - points[k].y + points[k].size, xMedium + line_stroke_thick, yMedium + points[k].size)
+                        p.T(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y + points[n[1][n[1].index(k) + 1]].size)
+                        p.L(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y)
+                        p.Q(points[n[1][n[1].index(k)+1]].x - (spacing/2), height - points[n[1][n[1].index(k) + 1]].y, xMedium - line_stroke_thick, yMedium2)
+                        p.T(points[k].x + points[k].width, height - points[k].y)
+
+                    p.Z()
+                    d.append(p)
+                elif connection_type.lower() == 'curved':
+                    p = draw.Path(fill=color, stroke=line_stroke_color, opacity=line_opacity,
+                                  stroke_width=line_stroke_width)
+
+                    size_start = points[k].size
+                    size_end = points[n[1][n[1].index(k) + 1]].size
+
+                    x1_start = points[k].x + points[k].width
+                    y1_start = height - points[k].y + size_start
+
+                    x1_end = points[n[1][n[1].index(k) + 1]].x
+                    y1_end = height - points[n[1][n[1].index(k) + 1]].y + size_end
+
+                    x2_start = x1_start
+                    y2_start = y1_start - size_start
+
+                    x2_end = x1_end
+                    y2_end = y1_end - size_end
+
+                    x_diff = x1_end - x1_start
+                    y_diff = y2_start - y1_end
+                    height_factor = 2
+                    width_factor = 0
+
+                    if points[k].y == points[n[1][n[1].index(k) + 1]].y:
+                        p.M(x1_start, y1_start)
+                        p.L(x2_start, y2_start)
+                        p.L(x2_end, y2_end)
+                        p.L(x1_end, y1_end)
+                        p.Z()
+                        d.append(p)
+                        pass
+
+                    else:
+                        p.M(x1_start, y1_start)
+                        cx1 = x1_end - (x_diff / 4 * 3)
+                        cy1 = y1_start
+                        ex1 = x1_end - (x_diff / 2)
+                        ey1 = y1_end + (y_diff / 2)
+                        p.Q(cx1, cy1, ex1, ey1)
+
+                        cx2 = x1_start + (x_diff / 4 * 3)
+                        cy2 = y1_end - (size_end / height_factor)
+                        p.Q(cx2, cy2, x1_end, y1_end)
+
+                        p.L(x2_end, y2_end)
+
+                        cx3 = (x2_end - (x_diff / 4))
+                        cy3 = (y2_end - (size_end / height_factor))
+                        ex3 = (x2_end + ((x1_start - x1_end) / 2) - width_factor)
+                        ey3 = (y2_end + (((y1_start - y1_end) / 2) - (((size_start + size_end) / 2)) / height_factor))
+                        p.Q(cx3, cy3, ex3, ey3)
+
+                        cx4 = x2_start + (x_diff / 4)
+                        cy4 = y2_start
+                        p.Q(cx4, cy4, x2_start, y2_start)
+
+                        p.Z()
+                        d.append(p)
+
+                elif connection_type.lower() == 'straight':
+                    p = draw.Path(fill=color, stroke=line_stroke_color, opacity=line_opacity,
+                                  stroke_width=line_stroke_width)
+                    size_start = points[k].size
+                    size_end = points[n[1][n[1].index(k) + 1]].size
+
+                    x1_start = points[k].x + points[k].width
+                    y1_start = height - points[k].y
+
+                    x1_end = points[n[1][n[1].index(k) + 1]].x
+                    y1_end = height - points[n[1][n[1].index(k) + 1]].y
+
+                    x2_start = x1_start
+                    y2_start = y1_start + size_start
+
+                    x2_end = x1_end
+                    y2_end = y1_end + size_end
+
+                    p.M(x1_start, y1_start)
+                    p.L(x2_start, y2_start)
+                    p.L(x2_end, y2_end)
+                    p.L(x1_end, y1_end)
+
+                    p.Z()
+                    d.append(p)
+
                 else:
-                    xMedium = ((points[n[1][n[1].index(k)+1]].x-(points[k].x+points[k].width))/2)+(points[k].x+points[k].width)
-                    yMedium = (((height - points[k].y + points[k].size) - (height - points[n[1][n[1].index(k) + 1]].y + points[k].size)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
-                    yMedium2 = (((height - points[k].y) - (height - points[n[1][n[1].index(k) + 1]].y)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
-                    p.Q(points[k].x + points[k].width + (spacing/2), height - points[k].y + points[k].size, xMedium + line_stroke_thick, yMedium + points[k].size)
-                    p.T(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y + points[n[1][n[1].index(k) + 1]].size)
-                    p.L(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y)
-                    p.Q(points[n[1][n[1].index(k)+1]].x - (spacing/2), height - points[n[1][n[1].index(k) + 1]].y, xMedium - line_stroke_thick, yMedium2)
-                    p.T(points[k].x + points[k].width, height - points[k].y)
-
-                p.Z()
-                d.append(p)
+                    print('This connection type is not implemented.')
+                    raise KeyError
 
     # nodes
     # return points
@@ -396,10 +487,11 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
 
 
 def visualize(data, spacing=50, node_size=10, width=None, height=None, minValue=1, maxValue=10, node_scaling="linear",
-              color_startEnd=True, color_categories=True, nodes_color="gray", start_node_color="green",
-              end_node_color="red", palette=None, show_labels=True, label_text="item", label_font="sans-serif",
-              label_color="black", label_size=5, label_shortening="clip", label_position="nodes", line_opacity=0.5,
-              line_stroke_color="white", line_stroke_width=0.5, line_stroke_thick=0.5, legend=True, sort_by="frequency"):
+              connection_type="semi-curved", color_startEnd=True, color_categories=True, nodes_color="gray",
+              start_node_color="green", end_node_color="red", palette=None, show_labels=True,
+              label_text="item", label_font="sans-serif", label_color="black", label_size=5,
+              label_shortening="clip", label_position="nodes", line_opacity=0.5, line_stroke_color="white",
+              line_stroke_width=0.5, line_stroke_thick=0.5, legend=True, sort_by="frequency"):
     """
     Generates an SVG from data loaded via the read functions.
 
@@ -412,6 +504,7 @@ def visualize(data, spacing=50, node_size=10, width=None, height=None, minValue=
     minValue (int): min size of a node , defaults to 1
     maxValue (int): max size of a node, defaults to 10
     node_scaling (str): "linear" or ... " ", defaults to "linear"
+    connection_type (str): "semi-curved" or "curved" or "linear", defaults to "semi-curved"
     color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category, defaults to True
     color_categories (bool): if True the nodes and the lines are colored depending by the subcategory, deafults to True
     nodes_color (str): the color of the nodes if the previous two options are false, defaults to "gray", used also for the lines and for the middle nodes in case of startEnd option
@@ -437,12 +530,13 @@ def visualize(data, spacing=50, node_size=10, width=None, height=None, minValue=
     """
 
     nodes = pcf.nodify(data, sort_by=sort_by)
-    viz = genSVG(nodes, spacing, node_size, width=width, height=height, minValue=minValue, maxValue=maxValue,
-                 node_scaling=node_scaling, color_startEnd=color_startEnd, color_categories=color_categories,
-                 nodes_color=nodes_color, start_node_color=start_node_color, end_node_color=end_node_color,
-                 palette=palette, show_labels=show_labels, label_text=label_text,
-                 label_font=label_font, label_color=label_color, label_size=label_size,
-                 label_shortening=label_shortening, label_position=label_position, line_opacity=line_opacity,
-                 line_stroke_color=line_stroke_color, line_stroke_width=line_stroke_width,
-                 line_stroke_thick=line_stroke_thick, legend=legend)
+    viz = genSVG(nodes, spacing, node_size, width=width, height=height, minValue=minValue,
+                 maxValue=maxValue, node_scaling=node_scaling, connection_type=connection_type,
+                 color_startEnd=color_startEnd, color_categories=color_categories,
+                 nodes_color=nodes_color, start_node_color=start_node_color,
+                 end_node_color=end_node_color, palette=palette, show_labels=show_labels,
+                 label_text=label_text, label_font=label_font, label_color=label_color,
+                 label_size=label_size, label_shortening=label_shortening, label_position=label_position,
+                 line_opacity=line_opacity, line_stroke_color=line_stroke_color,
+                 line_stroke_width=line_stroke_width, line_stroke_thick=line_stroke_thick, legend=legend)
     return viz
