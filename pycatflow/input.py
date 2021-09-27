@@ -209,13 +209,13 @@ def read(data,
         lines = data.split(line_delimiter)[1:]
         data = {}
         for h in headers:
-            data[h] = [line.split(delimiter)[headers.index(h)] for line in lines]
+            # data[h] = [line.split(delimiter)[headers.index(h)] for line in lines]
+            data[h.replace('\r', '')] = [line.split(delimiter)[headers.index(h)].replace('\r', '') for line in lines]
     if type(data) == list:
         headers = data[0]
         lines = data[1:]
         data = {}
         for h in headers:
             data[h.replace('\r', '')] = [line.split(delimiter)[headers.index(h)].replace('\r', '') for line in lines]
-    
     data = prepare_data(data, columns, nodes, categories, orientation, column_order, prefix)
     return data
