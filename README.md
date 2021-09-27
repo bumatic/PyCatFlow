@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5531785.svg)](https://doi.org/10.5281/zenodo.5531785)
+
 # PyCatFlow
 
 This package is a visualization tool which allows the representation of temporal developments, based on categorical data.
@@ -57,6 +59,8 @@ Running the above code creates this visualization:
 ## Credits & License
 
 PyCatFlow was conceptualized by Marcus Burkhardt and implemented by Herbert Natta ([@herbertmn](https://github.com/herbertmn)). It is inspired by the Rankflow visualization tool develped by Bernhard Rieder. 
+
+**Cite as:** Marcus Burkhardt, and Herbert Natta. 2021. “PyCatFlow: A Python Package for Visualizing Categorical Data over Time”. Zenodo. https://doi.org/10.5281/zenodo.5531785.
 
 The package is released under MIT License.
 
