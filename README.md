@@ -2,7 +2,7 @@
 
 # PyCatFlow
 
-This package is a visualization tool which allows the representation of temporal developments, based on categorical data.
+This package is a visualization tool which allows the representation of temporal developments, based on categorical data. I wrote a short [article on Medium](https://medium.com/@bumatic/pycatflow-visualizing-categorical-data-over-time-b344102bcce2) in which I outline the basic idea of PyCatFlow and provide a Tutorial for non-programmers based on a [Jupyter Notebook with interactive widgets that can be run online](https://mybinder.org/v2/gist/bumatic/83c3423595cde010da7ad059c6b8b2f5/HEAD).
 
 ## Install 
 
