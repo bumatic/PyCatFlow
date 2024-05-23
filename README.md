@@ -42,8 +42,8 @@ data = pcf.read_file("sample_data_ChatterBot_Requirements.csv", columns="column"
 
 # Generating the visualization
 viz = pcf.visualize(data, spacing=20, width=800, maxValue=20, minValue=2)
-viz.save_png('sample_viz.png')
-viz.save_pvg('sample_viz.svg')
+viz.savePng('sample_viz.png')
+viz.saveSvg('sample_viz.svg')
 viz
 ```
 

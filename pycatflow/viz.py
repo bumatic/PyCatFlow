@@ -1,5 +1,5 @@
-import drawsvg as draw
-from matplotlib import colormaps,colors
+import drawSvg as draw
+from matplotlib import cm,colors
 import pycatflow as pcf
 import math
 import copy
@@ -191,7 +191,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
 
     # COLORS
     if palette is not None:
-        palette = colormaps.get_cmap(palette[0]).colors[:palette[1]]
+        palette = cm.get_cmap(palette[0], palette[1]).colors
         count = 0
         category_colors = {}
         for e in set([n.category for n in points]):
@@ -200,7 +200,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
             category_colors[e] = colors.to_hex(palette[count])
     else:
         # DEFAULT PALETTE: the number of colors is set in relation to the length of the category list
-        palette = colormaps.get_cmap("tab20c").colors[:(len(set([n.category for n in points])) + 1)]
+        palette = cm.get_cmap("tab20c", len(set([n.category for n in points])) + 1).colors
         count = 0
         category_colors = {}
         for e in set([n.category for n in points]):
@@ -229,11 +229,11 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     l -= 1
                 else:
                     break
-            d.append(draw.Text(h, x=x, y=height - spacing, font_size=l, font_family=label_font, fill=label_color))
+            d.append(draw.Text(h, x=x, y=height - spacing, fontSize=l, font_family=label_font, fill=label_color))
         elif label_shortening == "clip":
             clip = draw.ClipPath()
             clip.append(draw.Rectangle(x, height - spacing, n2, label_size))
-            d.append(draw.Text(h, x=x, y=height - spacing, font_size=l, font_family=label_font, clip_path=clip, fill=label_color))
+            d.append(draw.Text(h, x=x, y=height - spacing, fontSize=l, font_family=label_font, clip_path=clip, fill=label_color))
         elif label_shortening == "new_line":
             if len(h)*(label_size/2) > n2+points[0].size-(n2/8):
                 margin = int((n2+points[0].size-(n2/8))/(label_size/2))
@@ -242,7 +242,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     l -= 1
             else:
                 txt = h
-            d.append(draw.Text(txt, x=x, y=height-spacing, font_size=l, font_family=label_font, fill=label_color))
+            d.append(draw.Text(txt, x=x, y=height-spacing, fontSize=l, font_family=label_font, fill=label_color))
     
     # lines
     for n in sequence.items():        
@@ -423,18 +423,18 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                 if node.label not in [n.label for n in points][:node.index] or node.label not in [n.label for n in points][node.index+1:] and node.index < len(points) and node.x != max([n.x for n in points]):
                     if label_shortening == "clip":
                         label = draw.Text(txt, x=node.x+node.width+(n2/8), y=label_pos_y,
-                                          font_size=l, font_family=label_font, fill=label_color, clip_path=clip)
+                                          fontSize=l, font_family=label_font, fill=label_color, clip_path=clip)
                     else:
                         label = draw.Text(txt, x=node.x-(n2/8), y=label_pos_y,
-                                          font_size=l, font_family=label_font, fill=label_color, text_anchor="end")
+                                          fontSize=l, font_family=label_font, fill=label_color, text_anchor="end")
 
             elif label_position == "nodes":
                 if label_shortening == "clip":
                     label = draw.Text(txt, x=node.x+node.width+(n2/8), y=label_pos_y,
-                                      font_size=l, font_family=label_font, fill=label_color, clip_path=clip)
+                                      fontSize=l, font_family=label_font, fill=label_color, clip_path=clip)
                 else:
                     label = draw.Text(txt, x=node.x + node.width+(n2/8), y=label_pos_y,
-                                      font_size=l, font_family=label_font, fill=label_color)
+                                      fontSize=l, font_family=label_font, fill=label_color)
             d.append(label)
     
     # Add legend to canvas
@@ -445,7 +445,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
         
         legend_height = (symbol_size+offset) * len(category_colors)
         legend_header_y = legend_height + symbol_size + spacing_bottom + (offset)
-        legend_header = draw.Text("Legend", x=points[0].x, y=legend_header_y, font_size=label_size,
+        legend_header = draw.Text("Legend", x=points[0].x, y=legend_header_y, fontSize=label_size,
                                   font_family=label_font, fill=label_color)
 
         if debug_legend:
@@ -475,7 +475,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                 print()
 
             name = draw.Text(e[0], x=points[0].x+node.width+(n2/12), y=legend_label_y,
-                             font_size=label_size, fill=label_color)
+                             fontSize=label_size, fill=label_color)
             d.append(symbol)
             d.append(name)
             if spacing_bottom+legend_height-(offset)-symbol_y_shift > spacing_bottom:
