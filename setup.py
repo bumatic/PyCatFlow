@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pycatflow", 
-    version="0.1.1",
+    version="0.1.1a",
     author="Marcus Burkhardt",
     author_email="marcus.burkhardt@gmail.com",
     description="A tool for visualizing categorical data over time.",
@@ -20,5 +20,5 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
-    install_requires=['drawSVG<2.0', 'matplotlib']
+    install_requires=['drawSVG<2.0', 'matplotlib<3.9']
 )
