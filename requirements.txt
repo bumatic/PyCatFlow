@@ -1,2 +1,2 @@
-drawSVG
+drawsvg[all] >=2.0
 matplotlib
