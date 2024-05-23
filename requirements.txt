@@ -1,2 +1,2 @@
-drawSVG
-matplotlib
+drawSVG<2.0
+matplotlib<3.9
