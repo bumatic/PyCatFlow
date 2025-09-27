@@ -30,8 +30,13 @@ pip install pycatflow
 ```bash
 git clone https://github.com/bumatic/PyCatFlow.git
 cd PyCatFlow
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pip install -e .
+```
+
+**Alternative using extras:**
+```bash
+pip install -e ".[dev]"
 ```
 
 ### System Dependencies
@@ -281,24 +286,6 @@ ItemC,,TypeZ,TypeZ
   - `viz.savePng()` → `viz.save_png()`
 - **Package name**: Import statement unchanged (`import drawsvg`), but package name is now lowercase
 
-#### New Features
-- **Improved coordinate system**: Modernized to use native SVG coordinates
-- **Enhanced legend positioning**: Fixed legend placement issues from previous versions
-- **Better PNG export**: Improved compatibility with cairosvg for high-quality PNG output
-- **Comprehensive testing**: Added extensive test suite for validation
-
-#### Technical Improvements
-- **Code simplification**: Removed complex Y-axis inversion logic (19+ coordinate transformations)
-- **Performance optimization**: Streamlined coordinate calculations
-- **Better error handling**: Enhanced error messages and edge case handling
-- **Documentation updates**: Comprehensive API documentation and examples
-
-#### Bug Fixes
-- **Legend positioning**: Fixed legend appearing above canvas instead of below
-- **Font sizing**: Corrected font size parameter naming (`fontSize` → `font_size`)
-- **Coordinate calculations**: Fixed connection path calculations for all connection types
-- **File size optimization**: Reduced output file size by ~3% through coordinate simplification
-
 #### Migration Notes
 Users upgrading from version 0.1.x should:
 1. Update method calls: `save_svg()` and `save_png()` instead of camelCase versions
@@ -328,7 +315,12 @@ pip install -e .
 ### Running Tests
 
 ```bash
+# Using pytest (recommended)
 python -m pytest tests/ -v
+
+# With coverage report
+python -m pytest tests/ --cov=pycatflow --cov-report=html
+
 ```
 
 ### Code Style

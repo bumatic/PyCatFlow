@@ -1,0 +1,21 @@
+# Development dependencies for PyCatFlow
+# Install with: pip install -r requirements-dev.txt
+
+# Core dependencies
+-r requirements.txt
+
+# Testing framework
+pytest>=6.0.0
+pytest-cov>=2.10.0
+
+# Code quality
+flake8>=3.8.0
+black>=21.0.0
+
+# Documentation
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
+
+# Build tools
+build>=0.7.0
+twine>=3.4.0

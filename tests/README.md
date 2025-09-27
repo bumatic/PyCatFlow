@@ -90,8 +90,10 @@ The test suite covers:
 ### Required
 - Python 3.6+
 - drawsvg >= 2.0
+- CairoSVG ~=2.3
 - matplotlib
 - pycatflow
+
 
 ### Optional (for full test coverage)
 - CairoSVG (for PNG export tests)

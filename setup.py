@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pycatflow", 
+    name="pycatflow",
     version="0.2.0",
     author="Marcus Burkhardt",
     author_email="marcus.burkhardt@gmail.com",
@@ -20,5 +20,20 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
-    install_requires=['drawsvg>=2.0', 'matplotlib']
+    install_requires=['drawsvg>=2.0', 'matplotlib'],
+    extras_require={
+        'dev': [
+            'pytest>=6.0.0',
+            'pytest-cov>=2.10.0',
+            'flake8>=3.8.0',
+            'black>=21.0.0',
+            'build>=0.7.0',
+            'twine>=3.4.0'
+        ],
+        'png': ['cairosvg>=2.3.0'],
+        'docs': [
+            'sphinx>=4.0.0',
+            'sphinx-rtd-theme>=1.0.0'
+        ]
+    }
 )
