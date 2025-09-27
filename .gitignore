@@ -5,6 +5,7 @@ example/pycatflow
 **/.idea/
 .claude/
 claude.md
+drawsvg_migration_env/
 
 __pycache__/
 *.py[cod]
