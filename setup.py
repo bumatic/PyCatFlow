@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pycatflow",
-    version="0.2.0.1",
+    version="0.2.1",
     author="Marcus Burkhardt",
     author_email="marcus.burkhardt@gmail.com",
     description="A tool for visualizing categorical data over time.",
