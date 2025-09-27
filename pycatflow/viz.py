@@ -513,8 +513,13 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                                       font_size=l, font_family=label_font, fill=label_color)
             d.append(label)
     
-    # Add legend to canvas
-    if color_categories and legend:
+    # Add legend to canvas - only if categories are meaningful
+    # (multiple categories and not all "null")
+    unique_categories = set([n.category for n in points])
+    has_meaningful_categories = (len(unique_categories) > 1 and
+                                 not (len(unique_categories) == 1 and "null" in unique_categories))
+
+    if color_categories and legend and has_meaningful_categories:
         # Use same spacing as main visualization nodes
         legend_spacing = spacingy  # Match node vertical spacing
         symbol_size = sum([x.size for x in points])/len(points)  # Average node size

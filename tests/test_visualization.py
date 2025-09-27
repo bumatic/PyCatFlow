@@ -157,7 +157,7 @@ class TestVisualization(unittest.TestCase):
 
     def test_legend_functionality(self):
         """Test legend creation and positioning"""
-        # Test with legend enabled
+        # Test with legend enabled and categories present
         viz_with_legend = pcf.visualize(
             self.sample_data,
             legend=True,
@@ -186,6 +186,54 @@ class TestVisualization(unittest.TestCase):
             width=400
         )
         self.assertIsNotNone(viz_no_legend)
+
+        # Test with no categories - legend should not appear even if enabled
+        data_no_categories = {
+            '2020': {'ItemA': 5, 'ItemB': 3},
+            '2021': {'ItemA': 7, 'ItemC': 2}
+        }
+        viz_no_categories = pcf.visualize(
+            data_no_categories,
+            legend=True,  # Legend enabled but shouldn't show
+            spacing=20,
+            width=400
+        )
+
+        with tempfile.NamedTemporaryFile(suffix='.svg', delete=False) as tmp:
+            try:
+                viz_no_categories.save_svg(tmp.name)
+                with open(tmp.name, 'r') as f:
+                    svg_content = f.read()
+                    # Should NOT contain legend
+                    self.assertNotIn('Legend', svg_content)
+
+            finally:
+                if os.path.exists(tmp.name):
+                    os.unlink(tmp.name)
+
+        # Test with single category - legend should not appear
+        data_single_category = {
+            '2020': {'ItemA': (5, 'sametype'), 'ItemB': (3, 'sametype')},
+            '2021': {'ItemA': (7, 'sametype')}
+        }
+        viz_single_category = pcf.visualize(
+            data_single_category,
+            legend=True,  # Legend enabled but shouldn't show
+            spacing=20,
+            width=400
+        )
+
+        with tempfile.NamedTemporaryFile(suffix='.svg', delete=False) as tmp:
+            try:
+                viz_single_category.save_svg(tmp.name)
+                with open(tmp.name, 'r') as f:
+                    svg_content = f.read()
+                    # Should NOT contain legend for single category
+                    self.assertNotIn('Legend', svg_content)
+
+            finally:
+                if os.path.exists(tmp.name):
+                    os.unlink(tmp.name)
 
     def test_sorting_options(self):
         """Test different sorting options"""
