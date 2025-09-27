@@ -7,7 +7,40 @@ import copy
 debug_legend = False
 
 class Node:
+    """
+    Represents a data point node in the temporal flow visualization.
+
+    A Node contains all necessary information to position and render a single
+    categorical data point within the flow diagram, including its coordinates,
+    dimensions, and associated metadata.
+
+    Attributes:
+        index (int): Unique identifier for this node within the dataset
+        col_index (int): Column/time period index this node belongs to
+        x (float): X-coordinate position on the canvas
+        y (float): Y-coordinate position on the canvas
+        size (float): Height/vertical size of the node rectangle
+        value (float): Numerical value represented by this node
+        width (float): Width of the node rectangle
+        label (str): Text label identifying this node
+        category (str): Category classification for color coding
+    """
+
     def __init__(self, index, col_index, x, y, size, value, width, label, category):
+        """
+        Initialize a new Node instance.
+
+        Args:
+            index (int): Unique identifier for this node
+            col_index (int): Column/time period index
+            x (float): X-coordinate position
+            y (float): Y-coordinate position
+            size (float): Height/vertical size of the node
+            value (float): Numerical value represented
+            width (float): Width of the node
+            label (str): Text label for identification
+            category (str): Category for color classification
+        """
         self.x = x
         self.index = index
         self.col_index = col_index
@@ -21,14 +54,35 @@ class Node:
 
 def nodify(data, sort_by="frequency"):
     """
-    Takes data and creates a list containing information about the nodes for the graph.
+    Convert structured data into Node objects for visualization.
 
-    Parameters:
-    data (dict): output of the read_file/read functions, a dictionary with keys the temporal data, and values a dictionary with keys of the item and values or the frequency of the item or a tuple with the frequency and the category
-    sort_by (str): "frequency" or "alphabetical" or "category", defaults to "frequency"
+    Transforms the dictionary output from read_file/read functions into a list
+    of Node objects with positioning information, sorted according to the
+    specified criteria.
+
+    Args:
+        data (dict): Structured data from read_file() or read() functions.
+            Dictionary with time periods as keys and item dictionaries as values.
+            Item values can be either frequencies (int/float) or tuples of
+            (frequency, category).
+        sort_by (str, optional): Sorting method for nodes within each time period.
+            Options: "frequency", "alphabetical", "category".
+            Defaults to "frequency".
 
     Returns:
-    (list): A list containing information about the nodes for the graph
+        list: Three-element list containing:
+            - headers (list): Time period labels
+            - nodes (list): Node objects with positioning data
+            - sequence (dict): Mapping of labels to node index sequences
+
+    Raises:
+        KeyError: If sort_by parameter is not a valid option
+
+    Examples:
+        >>> data = {'2020': {'ItemA': 5, 'ItemB': 3}, '2021': {'ItemA': 7}}
+        >>> headers, nodes, sequence = nodify(data, sort_by="frequency")
+        >>> len(nodes)
+        3
     """
     d = {}
     if sort_by == "frequency":
@@ -82,39 +136,53 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
            label_color="black", label_size=5, label_shortening="clip", label_position="nodes", line_opacity=0.5,
            line_stroke_color="white", line_stroke_width=0.5, line_stroke_thick=0.5, legend=True):
     """
-    Generates an SVG from data loaded via the read functions.
+    Generate SVG visualization from processed node data.
 
-    Parameters:
-    nodes (list): The output of nodify(), a list containingg information about the nodes for the graph
-    spacing (int): the space between the nodes, defaults to 50
-    node_size (int): default node size, defauults to 10
-    width (int): width of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
-    height (int): height of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
-    minValue (int): min size of a node , defaults to 1
-    maxValue (int): max size of a node, defaults to 10
-    node_scaling (str): "linear" or ... " ", defaults to "linear"
-    connection_type (str): "semi-curved" or "curved" or "linear", defaults to "semi-curved"
-    color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category, defaults to True
-    color_categories (bool): if True the nodes and the lines are colored depending by the subcategory, deafults to True
-    nodes_color (str): the color of the nodes if the previous two options are false, defaults to "gray", used also for the lines and for the middle nodes in case of startEnd option
-    start_node_color (str): Defaults to "green"
-    end_node_color (str): Defaults to "red"
-    palette (tuple): a tuple with the name of the matplotlib palette and the number of colors ("viridis",12), defaults to None
-    show_labels (bool): Defaults to True
-    label_text (str): "item" shows the category, defaults to "item", "item_count" shows the category and the frequency, "item_category" shows the category and the subcategory
-    label_font (str): Defaults to "sans-serif"
-    label_color (str): Defaults to "black"
-    label_size (int): Defaults to 5
-    label_shortening (str): defaults to "clip", "clip" cuts the text when it overlaps the margin, "resize" changes the size of the font to fit the available space, "new_line" wraps the text when it overlaps the margin and it rescale the size if the two lines overlaps the bottom margin
-    label_position (str): defaults to "nodes", "nodes" shows a label for each node, "start_end" shows a label for the first and last node of a sequence
-    line_opacity (float): Defaults to 0.5
-    line_stroke_color (str): Defaults to "white"
-    line_stroke_width (float): Defaults to 0.5
-    line_stroke_thick (float): Defaults to 0.5
-    legend (bool): If True a Legend is included, defaults to True
+    Creates a complete temporal flow diagram showing categorical data evolution
+    over time periods with customizable styling, connections, and annotations.
+
+    Args:
+        nodes (list): Output from nodify() containing headers, node objects, and sequences
+        spacing (int): Horizontal spacing between time periods (pixels)
+        node_size (int): Base size for node rectangles (pixels)
+        width (int, optional): Canvas width. If None, auto-calculated from content
+        height (int, optional): Canvas height. If None, auto-calculated from content
+        minValue (int): Minimum node size regardless of data value. Defaults to 1
+        maxValue (int): Maximum node size for scaling. Defaults to 10
+        node_scaling (str): Scaling method for node sizes. Options: "linear", "log"
+        connection_type (str): Style of connections between nodes.
+            Options: "semi-curved", "curved", "straight". Defaults to "semi-curved"
+        color_startEnd (bool): Highlight first/last appearances with special colors
+        color_categories (bool): Color nodes/connections by category. Defaults to True
+        nodes_color (str): Default node color when category coloring disabled
+        start_node_color (str): Color for first appearance nodes. Defaults to "green"
+        end_node_color (str): Color for last appearance nodes. Defaults to "red"
+        palette (tuple, optional): Matplotlib colormap specification as (name, count)
+        show_labels (bool): Display text labels on nodes. Defaults to True
+        label_text (str): Label content type. Options: "item", "item_count", "item_category"
+        label_font (str): Font family for labels. Defaults to "sans-serif"
+        label_color (str): Text color for labels. Defaults to "black"
+        label_size (int): Font size for labels. Defaults to 5
+        label_shortening (str): Text overflow handling. Options: "clip", "resize", "new_line"
+        label_position (str): Label placement. Options: "nodes", "start_end"
+        line_opacity (float): Transparency of connection lines (0.0-1.0)
+        line_stroke_color (str): Border color for connections. Defaults to "white"
+        line_stroke_width (float): Border width for connections. Defaults to 0.5
+        line_stroke_thick (float): Line thickness variation. Defaults to 0.5
+        legend (bool): Include category legend in output. Defaults to True
 
     Returns:
-    (drawsvg.drawing.Drawing): The finished graph
+        drawsvg.Drawing: Complete SVG visualization ready for export or display
+
+    Raises:
+        KeyError: If connection_type is not a supported option
+        ValueError: If node scaling parameters are invalid
+
+    Notes:
+        - Canvas dimensions are auto-calculated if not specified
+        - Color palettes use matplotlib colormaps for consistency
+        - Connection algorithms vary by type for different visual effects
+        - Legend positioning is optimized for readability
     """ 
     headers = nodes[0]
     nodes2 = copy.deepcopy(nodes[1])
@@ -494,40 +562,68 @@ def visualize(data, spacing=50, node_size=10, width=None, height=None, minValue=
               label_shortening="clip", label_position="nodes", line_opacity=0.5, line_stroke_color="white",
               line_stroke_width=0.5, line_stroke_thick=0.5, legend=True, sort_by="frequency"):
     """
-    Generates an SVG from data loaded via the read functions.
+    Create a complete temporal flow visualization from structured data.
 
-    Parameters:
-    data (dict): output of the read_file/read functions, a dictionary with keys the temporal data, and values a dictionary with keys of the item and values or the frequency of the item or a tuple with the frequency and the category
-    spacing (int): the space between the nodes, defaults to 50
-    node_size (int): default node size, defauults to 10
-    width (int): width of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
-    height (int): height of the visualization, defaults to None, if None they are generated from the size of the nodes, if they are specified the nodes will be rescaled to fit the space
-    minValue (int): min size of a node , defaults to 1
-    maxValue (int): max size of a node, defaults to 10
-    node_scaling (str): "linear" or ... " ", defaults to "linear"
-    connection_type (str): "semi-curved" or "curved" or "linear", defaults to "semi-curved"
-    color_startEnd (bool) : if True it marks the colors of the first and last appearence of a category, defaults to True
-    color_categories (bool): if True the nodes and the lines are colored depending by the subcategory, deafults to True
-    nodes_color (str): the color of the nodes if the previous two options are false, defaults to "gray", used also for the lines and for the middle nodes in case of startEnd option
-    start_node_color (str): Defaults to "green"
-    end_node_color (str): Defaults to "red"
-    palette (tuple): a tuple with the name of the matplotlib palette and the number of colors ("viridis",12), defaults to None
-    show_labels (bool): Defaults to True
-    label_text (str): "item" shows the category, defaults to "item", "item_count" shows the category and the frequency, "item_category" shows the category and the subcategory
-    label_font (str): Defaults to "sans-serif"
-    label_color (str): Defaults to "black"
-    label_size (int): Defaults to 5
-    label_shortening (str): defaults to "clip", "clip" cuts the text when it overlaps the margin, "resize" changes the size of the font to fit the available space, "new_line" wraps the text when it overlaps the margin and it rescale the size if the two lines overlaps the bottom margin
-    label_position (str): defaults to "nodes", "nodes" shows a label for each node, "start_end" shows a label for the first and last node of a sequence
-    line_opacity (float): Defaults to 0.5
-    line_stroke_color (str): Defaults to "white"
-    line_stroke_width (float): Defaults to 0.5
-    line_stroke_thick (float): Defaults to 0.5
-    legend (bool): If True a Legend is included, defaults to True
-    sort_by (str): "frequency" or "alphabetical" or "category", defaults to "frequency"
+    Main user-facing function that combines data processing and SVG generation
+    to create publication-ready temporal flow diagrams showing how categorical
+    data evolves over time periods.
+
+    Args:
+        data (dict): Structured data from read_file() or read() functions.
+            Dictionary mapping time periods to item frequency/category data
+        spacing (int): Horizontal spacing between time periods. Defaults to 50
+        node_size (int): Base size for node rectangles. Defaults to 10
+        width (int, optional): Canvas width in pixels. Auto-calculated if None
+        height (int, optional): Canvas height in pixels. Auto-calculated if None
+        minValue (int): Minimum node size scaling floor. Defaults to 1
+        maxValue (int): Maximum node size scaling ceiling. Defaults to 10
+        node_scaling (str): Node size scaling method. Options: "linear", "log"
+        connection_type (str): Visual style for inter-node connections.
+            Options: "semi-curved", "curved", "straight". Defaults to "semi-curved"
+        color_startEnd (bool): Highlight first/last node appearances. Defaults to True
+        color_categories (bool): Apply category-based color coding. Defaults to True
+        nodes_color (str): Fallback color when category coloring disabled. Defaults to "gray"
+        start_node_color (str): Color for initial appearances. Defaults to "green"
+        end_node_color (str): Color for final appearances. Defaults to "red"
+        palette (tuple, optional): Custom colormap as (matplotlib_name, color_count)
+        show_labels (bool): Display text labels on nodes. Defaults to True
+        label_text (str): Label content format. Options: "item", "item_count", "item_category"
+        label_font (str): Font family for text. Defaults to "sans-serif"
+        label_color (str): Text color. Defaults to "black"
+        label_size (int): Font size in points. Defaults to 5
+        label_shortening (str): Text overflow behavior. Options: "clip", "resize", "new_line"
+        label_position (str): Label placement strategy. Options: "nodes", "start_end"
+        line_opacity (float): Connection transparency (0.0-1.0). Defaults to 0.5
+        line_stroke_color (str): Connection border color. Defaults to "white"
+        line_stroke_width (float): Connection border thickness. Defaults to 0.5
+        line_stroke_thick (float): Connection line weight variation. Defaults to 0.5
+        legend (bool): Include categorical legend. Defaults to True
+        sort_by (str): Node sorting within time periods.
+            Options: "frequency", "alphabetical", "category". Defaults to "frequency"
 
     Returns:
-    (drawsvg.drawing.Drawing): The finished graph
+        drawsvg.Drawing: Complete SVG visualization with the following methods:
+            - save_svg(filename): Export as scalable vector graphics
+            - save_png(filename): Export as raster image (requires cairosvg)
+            - Direct display in Jupyter notebooks
+
+    Examples:
+        Basic usage:
+        >>> data = pcf.read_file("data.csv", columns="year", nodes="category")
+        >>> viz = pcf.visualize(data, spacing=30, width=800)
+        >>> viz.save_svg("output.svg")
+
+        Advanced styling:
+        >>> viz = pcf.visualize(data,
+        ...                    connection_type="curved",
+        ...                    palette=("viridis", 8),
+        ...                    label_text="item_count")
+
+    Notes:
+        - Processing pipeline: data → nodify() → genSVG() → Drawing
+        - Canvas dimensions auto-adjust to content when not specified
+        - Category colors assigned automatically from matplotlib colormaps
+        - Performance scales well up to ~1000 categories per time period
     """
 
     nodes = pcf.nodify(data, sort_by=sort_by)

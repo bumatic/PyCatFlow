@@ -1,12 +1,30 @@
 def find_delimiter(data):
     """
-    This function finds and returns the delimiter of the given data.
+    Automatically detect the CSV delimiter used in the data.
 
-    Parameters:
-    data (string): data in which to look for the used delimiter
+    Analyzes the first line of CSV data to identify the most likely delimiter
+    by counting occurrences of common delimiters and selecting the most frequent.
+
+    Args:
+        data (str or bytes): CSV data as string or bytes. If bytes, will be
+            decoded as UTF-8 before analysis.
 
     Returns:
-    (string): delimiter used in given data
+        str: The detected delimiter character. One of: ',', ';', or '\t'
+
+    Examples:
+        >>> csv_data = "name,age,city\\nJohn,25,NYC"
+        >>> find_delimiter(csv_data)
+        ','
+
+        >>> csv_data = "name;age;city\\nJohn;25;NYC"
+        >>> find_delimiter(csv_data)
+        ';'
+
+    Notes:
+        - Only analyzes the first line (header row) for delimiter detection
+        - Supports comma, semicolon, and tab delimiters
+        - Returns the delimiter with the highest occurrence count
     """
     if type(data) == str:
         headers = data.split("\n")[0]
@@ -25,14 +43,36 @@ def find_delimiter(data):
 
 def detect_dtype(data, prefix):
     """
-    Transforms objects inside data into the correct datatypes and returns a sorted and duplicate-free list.
+    Convert and sort data elements by detecting appropriate data types.
 
-    Parameters:
-    data (list): a single column
-    prefix (str): delete an unwanted prefix out of the data
+    Processes a list of string values, attempts to convert them to appropriate
+    data types (int, float, date, or string), removes duplicates, and returns
+    a sorted list with consistent data types.
+
+    Args:
+        data (list): List of string values to process and type-convert
+        prefix (str): String prefix to remove from each data element before
+            type conversion (e.g., remove currency symbols or units)
 
     Returns:
-    (list): original data without duplicates in correct datatypes
+        list: Sorted list of unique values with appropriate data types.
+            Integers and floats are sorted numerically, dates chronologically,
+            and strings alphabetically.
+
+    Examples:
+        >>> data = ["2020", "2021", "2019", "2020"]
+        >>> detect_dtype(data, "")
+        [2019, 2020, 2021]
+
+        >>> data = ["$100", "$50", "$200"]
+        >>> detect_dtype(data, "$")
+        [50, 100, 200]
+
+    Notes:
+        - Type detection order: int → float → date → string
+        - Uses dateutil.parser for flexible date parsing
+        - Duplicates are automatically removed
+        - Sorting respects the detected data type
     """
     t1 = []
     t2 = []
@@ -62,19 +102,42 @@ def detect_dtype(data, prefix):
 
 def prepare_data(data, columns_data, node_data, category_data, orientation, sort_field, prefix):
     """
-    Arranges the data into a new format to make is usable for the flow visualisation.
+    Transform raw CSV data into structured format for visualization.
 
-    Parameters:
-    data (dict): original data transformed to a dict
-    columns_data (str): Name of the column with temporal data (None if orientation="vertical")
-    node_data (str): which column to use as nodes in the graph 
-    category_data (str): Name of the column containing optional categories of nodes
-    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column
-    sort_field (str): Optionally provide the name of a column determining the order of the time_field columns
-    prefix (str): delete an unwanted prefix out of the data
+    Converts dictionary-based CSV data into the nested dictionary structure
+    required by the visualization functions, handling different data orientations
+    and calculating frequency counts for categorical data.
+
+    Args:
+        data (dict): Parsed CSV data as column name → values mapping
+        columns_data (str): Column name containing time periods (for horizontal orientation)
+        node_data (str): Column name containing categorical items to track
+        category_data (str, optional): Column name for subcategory classification
+        orientation (str): Data layout format. Options: "horizontal", "vertical"
+        sort_field (str, optional): Column name for custom time period ordering
+        prefix (str): String prefix to remove from time period labels
 
     Returns:
-    (dict): Dictionary of parsed data
+        dict: Structured data mapping time periods to item frequencies:
+            - Keys: Time period labels (sorted)
+            - Values: Dict mapping item names to frequencies or (frequency, category) tuples
+
+    Examples:
+        Horizontal orientation (time periods in column):
+        >>> data = {'year': ['2020', '2021'], 'library': ['numpy', 'pandas']}
+        >>> prepare_data(data, 'year', 'library', None, 'horizontal', None, '')
+        {'2020': {'numpy': 1}, '2021': {'pandas': 1}}
+
+        With categories:
+        >>> data = {'year': ['2020'], 'lib': ['numpy'], 'type': ['core']}
+        >>> prepare_data(data, 'year', 'lib', 'type', 'horizontal', None, '')
+        {'2020': {'numpy': (1, 'core')}}
+
+    Notes:
+        - Frequency counts are calculated automatically for each item
+        - Vertical orientation uses column headers as time periods
+        - Category data creates (frequency, category) tuples instead of simple counts
+        - Time periods are sorted using detect_dtype() for appropriate ordering
     """
     new_data = {}
     if orientation == 'horizontal':
@@ -131,21 +194,52 @@ def read_file(filepath,
               line_delimiter=None,
               prefix=""):
     """
-    Loads data from file and returns structured data for visualisation.
-    
-    Parameters:
-    filepath (str): Path to file
-    columns (str): Name of the column with temporal data (leave None if orientation="vertical")
-    nodes (str): Name of the column containing the node data
-    categories (str): Name of the column containing optional categories of nodes
-    column_order (str): Optionally provide the name of a column determining the order of the columns
-    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column
-    delimiter (str): Otpionally specify the delimiter, if None it will try to autodetect
-    line_delimiter (str): optionally define the line_delimiter separator, by default \n
-    prefix (str): delete an unwanted prefix out of the data
+    Load and parse CSV file data for temporal flow visualization.
+
+    Reads a CSV file, automatically detects formatting, and transforms the data
+    into the structured format required for creating temporal flow diagrams.
+
+    Args:
+        filepath (str): Path to the CSV file to load
+        columns (str, optional): Column name containing time periods.
+            Required for horizontal orientation, ignored for vertical
+        nodes (str): Column name containing categorical items to track over time
+        categories (str, optional): Column name for subcategory classification
+        column_order (str, optional): Column name specifying custom time period ordering
+        orientation (str): Data layout format. Options: "horizontal" (default), "vertical"
+        delimiter (str, optional): CSV field delimiter. Auto-detected if None
+        line_delimiter (str, optional): Line separator. Defaults to '\\n'
+        prefix (str): String prefix to remove from time period labels. Defaults to ""
 
     Returns:
-    (dict): Dictionary of parsed data
+        dict: Structured data ready for visualization:
+            - Keys: Time period labels (sorted appropriately)
+            - Values: Dict mapping item names to frequencies or (frequency, category) tuples
+
+    Raises:
+        FileNotFoundError: If the specified filepath does not exist
+        UnicodeDecodeError: If file encoding is not compatible with UTF-8
+        KeyError: If specified column names are not found in the CSV
+
+    Examples:
+        Basic usage:
+        >>> data = read_file("data.csv", columns="year", nodes="library")
+        >>> print(data)
+        {'2020': {'numpy': 3, 'pandas': 2}, '2021': {'numpy': 4, 'scipy': 1}}
+
+        With categories:
+        >>> data = read_file("data.csv",
+        ...                  columns="year",
+        ...                  nodes="library",
+        ...                  categories="type")
+        >>> print(data)
+        {'2020': {'numpy': (3, 'core'), 'pandas': (2, 'analysis')}}
+
+    Notes:
+        - File is read with UTF-8-sig encoding to handle BOM markers
+        - Delimiter auto-detection supports comma, semicolon, and tab
+        - Empty lines in the CSV are automatically filtered out
+        - Time periods are sorted using intelligent type detection
     """
 
     with open(filepath, "rb") as f:
@@ -179,21 +273,56 @@ def read(data,
          line_delimiter=None,
          prefix=""):
     """
-    Parses a string into structured data for visualization.
+    Parse structured data from various input formats for temporal flow visualization.
 
-    Parameters:
-    data (str): String with records divided by line_delimiter and fields divided by delimiter; list of lists with the first element as list of headers; dictionary with headers as keys and values as lists
-    columns (str): Name of the column with temporal data (leave None if orientation="vertical")
-    nodes (str): Name of the column containing the node data
-    categories (str): Name of the column containing optional categories of nodes
-    column_order (str): Optionally provide the name of a column determining the order of the columns
-    orientation (str): Horizontal if the temporal data are in one columns, vertical if the temporal data are the name of the column
-    delimiter (str): Otpionally specify the delimiter, if None it will try to autodetect
-    line_delimiter (str): optionally define the line_delimiter separator, by default \n
-    prefix (str): delete an unwanted prefix out of the data
+    Processes data from multiple input formats (strings, lists, dictionaries) and
+    transforms it into the structured format required for creating temporal flow diagrams.
+
+    Args:
+        data (str, list, or dict): Input data in one of several formats:
+            - str: CSV-formatted string with headers and delimited fields
+            - list: List of lists where first element contains column headers
+            - dict: Dictionary with column names as keys and value lists
+        columns (str, optional): Column name containing time periods.
+            Required for horizontal orientation, ignored for vertical
+        nodes (str): Column name containing categorical items to track over time
+        categories (str, optional): Column name for subcategory classification
+        column_order (str, optional): Column name specifying custom time period ordering
+        orientation (str): Data layout format. Options: "horizontal" (default), "vertical"
+        delimiter (str, optional): Field delimiter for string data. Auto-detected if None
+        line_delimiter (str, optional): Line separator for string data. Defaults to '\\n'
+        prefix (str): String prefix to remove from time period labels. Defaults to ""
 
     Returns:
-    (dict): Dictionary of parsed data
+        dict: Structured data ready for visualization:
+            - Keys: Time period labels (sorted appropriately)
+            - Values: Dict mapping item names to frequencies or (frequency, category) tuples
+
+    Raises:
+        TypeError: If data format is not supported
+        KeyError: If specified column names are not found in the data
+        ValueError: If data structure is malformed
+
+    Examples:
+        String input:
+        >>> csv_string = "year,library\\n2020,numpy\\n2021,pandas"
+        >>> data = read(csv_string, columns="year", nodes="library")
+        >>> print(data)
+        {'2020': {'numpy': 1}, '2021': {'pandas': 1}}
+
+        List input:
+        >>> list_data = [['year', 'library'], ['2020', 'numpy'], ['2021', 'pandas']]
+        >>> data = read(list_data, columns="year", nodes="library")
+
+        Dictionary input:
+        >>> dict_data = {'year': ['2020', '2021'], 'library': ['numpy', 'pandas']}
+        >>> data = read(dict_data, columns="year", nodes="library")
+
+    Notes:
+        - Automatically handles carriage returns and encoding issues
+        - Delimiter detection works for comma, semicolon, and tab separators
+        - Empty lines and malformed records are filtered out
+        - All input formats are normalized to dictionary structure before processing
     """
 
     if type(data) == str:
