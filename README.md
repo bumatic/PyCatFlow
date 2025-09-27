@@ -1,4 +1,5 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5531785.svg)](https://doi.org/10.5281/zenodo.5531785)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17215923.svg)](https://doi.org/10.5281/zenodo.17215923)
+
 
 # PyCatFlow
 
@@ -380,5 +381,6 @@ PyCatFlow is released under the MIT License. See LICENSE file for details.
 **Inspiration**: Rankflow visualization tool by Bernhard Rieder
 
 ---
+
 
 For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/bumatic/PyCatFlow).
