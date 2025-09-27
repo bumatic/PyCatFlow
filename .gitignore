@@ -3,6 +3,8 @@
 example/pycatflow
 **/.DS_Store
 **/.idea/
+.claude/
+claude.md
 
 __pycache__/
 *.py[cod]
