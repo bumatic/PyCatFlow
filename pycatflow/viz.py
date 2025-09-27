@@ -1,5 +1,6 @@
 import drawsvg as draw
-from matplotlib import cm,colors
+from matplotlib import cm, colors
+import matplotlib
 import pycatflow as pcf
 import math
 import copy
@@ -259,7 +260,8 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
 
     # COLORS
     if palette is not None:
-        palette = cm.get_cmap(palette[0], palette[1]).colors
+        # Use modern matplotlib colormap API
+        palette = matplotlib.colormaps[palette[0]].resampled(palette[1]).colors
         count = 0
         category_colors = {}
         for e in set([n.category for n in points]):
@@ -268,7 +270,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
             category_colors[e] = colors.to_hex(palette[count])
     else:
         # DEFAULT PALETTE: the number of colors is set in relation to the length of the category list
-        palette = cm.get_cmap("tab20c", len(set([n.category for n in points])) + 1).colors
+        palette = matplotlib.colormaps["tab20c"].resampled(len(set([n.category for n in points])) + 1).colors
         count = 0
         category_colors = {}
         for e in set([n.category for n in points]):
