@@ -29,5 +29,9 @@ Authors: Marcus Burkhardt, Herbert Natta
 License: MIT
 """
 
-from .input import *
-from .viz import *
+from .input import read_file, read, find_delimiter, detect_dtype, prepare_data
+from .viz import visualize, nodify, genSVG, Node
+
+__version__ = "0.2.0"
+__author__ = "Marcus Burkhardt"
+__email__ = "marcus.burkhardt@gmail.com"

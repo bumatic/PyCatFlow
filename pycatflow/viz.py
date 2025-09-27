@@ -1,11 +1,12 @@
 import drawsvg as draw
-from matplotlib import cm, colors
+from matplotlib import colors
 import matplotlib
 import pycatflow as pcf
 import math
 import copy
 
 debug_legend = False
+
 
 class Node:
     """
@@ -120,14 +121,14 @@ def nodify(data, sort_by="frequency"):
         for x, y, z in zip(l, v, s):
             nodes.append(Node(count, count2, 0, 0, y, y, 1, x, z))
             count += 1
-           
+
     for n in nodes:
         if n.label in sequence.keys():
             sequence[n.label].append(n.index)
         else:
             sequence[n.label] = []
             sequence[n.label].append(n.index)
-    
+
     return [headers, nodes, sequence]
 
 
