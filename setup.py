@@ -20,5 +20,5 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
-    install_requires=['drawSVG<2.0', 'matplotlib<3.9']
+    install_requires=['drawsvg>=2.0', 'matplotlib']
 )

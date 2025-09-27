@@ -1,2 +1,3 @@
-drawSVG<2.0
-matplotlib<3.9
+drawsvg>=2.0
+matplotlib
+cairoSVG~=2.3

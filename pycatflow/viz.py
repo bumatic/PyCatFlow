@@ -1,4 +1,4 @@
-import drawSvg as draw
+import drawsvg as draw
 from matplotlib import cm,colors
 import pycatflow as pcf
 import math
@@ -114,7 +114,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
     legend (bool): If True a Legend is included, defaults to True
 
     Returns:
-    (drawSvg.drawing.Drawing): The finished graph
+    (drawsvg.drawing.Drawing): The finished graph
     """ 
     headers = nodes[0]
     nodes2 = copy.deepcopy(nodes[1])
@@ -208,7 +208,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                 count += 1
             category_colors[e] = colors.to_hex(palette[count])
 
-    d = draw.Drawing(width, height, displayInline=True)
+    d = draw.Drawing(width, height, display_inline=True)
     r = draw.Rectangle(0, 0, width, height, stroke_width=2, stroke='black', fill="white")
     d.append(r)
 
@@ -223,17 +223,21 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
     
     for h, x in zip(headers, h_x_shift):
         l = label_size
+        # Center the header above the actual nodes, not the full column width
+        # Find the center of nodes in this column by using node width and position
+        header_x = x + (points[0].width / 2)  # Center above the actual nodes
+
         if label_shortening == "resize":
             while len(h)*(l/2) > n2+points[0].size-(n2/8) and l > 1:
                 if x != max(h_x_shift):
                     l -= 1
                 else:
                     break
-            d.append(draw.Text(h, x=x, y=height - spacing, fontSize=l, font_family=label_font, fill=label_color))
+            d.append(draw.Text(h, x=header_x, y=spacing, font_size=l, font_family=label_font, fill=label_color, text_anchor="middle"))
         elif label_shortening == "clip":
             clip = draw.ClipPath()
-            clip.append(draw.Rectangle(x, height - spacing, n2, label_size))
-            d.append(draw.Text(h, x=x, y=height - spacing, fontSize=l, font_family=label_font, clip_path=clip, fill=label_color))
+            clip.append(draw.Rectangle(x, 0, n2, spacing))
+            d.append(draw.Text(h, x=header_x, y=spacing, font_size=l, font_family=label_font, clip_path=clip, fill=label_color, text_anchor="middle"))
         elif label_shortening == "new_line":
             if len(h)*(label_size/2) > n2+points[0].size-(n2/8):
                 margin = int((n2+points[0].size-(n2/8))/(label_size/2))
@@ -242,7 +246,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     l -= 1
             else:
                 txt = h
-            d.append(draw.Text(txt, x=x, y=height-spacing, fontSize=l, font_family=label_font, fill=label_color))
+            d.append(draw.Text(txt, x=header_x, y=spacing, font_size=l, font_family=label_font, fill=label_color, text_anchor="middle"))
     
     # lines
     for n in sequence.items():        
@@ -254,22 +258,23 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     color = nodes_color
                 if connection_type.lower() == "semi-curved":
                     p = draw.Path(fill=color, stroke=line_stroke_color, opacity=line_opacity, stroke_width=line_stroke_width)
-                    p.M(points[k].x + points[k].width, height - points[k].y)
-                    p.L(points[k].x + points[k].width, height - points[k].y + points[k].size)
+                    p.M(points[k].x + points[k].width, points[k].y - points[k].size)
+                    p.L(points[k].x + points[k].width, points[k].y)
 
                     if points[k].y == points[n[1][n[1].index(k)+1]].y:
-                        p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y + points[k].size)
-                        p.L(points[n[1][n[1].index(k)+1]].x, height - points[k].y)
+                        p.L(points[n[1][n[1].index(k)+1]].x, points[k].y)
+                        p.L(points[n[1][n[1].index(k)+1]].x, points[k].y - points[k].size)
 
                     else:
                         xMedium = ((points[n[1][n[1].index(k)+1]].x-(points[k].x+points[k].width))/2)+(points[k].x+points[k].width)
-                        yMedium = (((height - points[k].y + points[k].size) - (height - points[n[1][n[1].index(k) + 1]].y + points[k].size)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
-                        yMedium2 = (((height - points[k].y) - (height - points[n[1][n[1].index(k) + 1]].y)) / 2) + (height - points[n[1][n[1].index(k) + 1]].y)
-                        p.Q(points[k].x + points[k].width + (spacing/2), height - points[k].y + points[k].size, xMedium + line_stroke_thick, yMedium + points[k].size)
-                        p.T(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y + points[n[1][n[1].index(k) + 1]].size)
-                        p.L(points[n[1][n[1].index(k)+1]].x, height - points[n[1][n[1].index(k) + 1]].y)
-                        p.Q(points[n[1][n[1].index(k)+1]].x - (spacing/2), height - points[n[1][n[1].index(k) + 1]].y, xMedium - line_stroke_thick, yMedium2)
-                        p.T(points[k].x + points[k].width, height - points[k].y)
+                        next_node = points[n[1][n[1].index(k) + 1]]
+                        yMedium = (points[k].y + next_node.y) / 2
+                        yMedium2 = (points[k].y - points[k].size + next_node.y - next_node.size) / 2
+                        p.Q(points[k].x + points[k].width + (spacing/2), points[k].y, xMedium + line_stroke_thick, yMedium)
+                        p.T(next_node.x, next_node.y)
+                        p.L(next_node.x, next_node.y - next_node.size)
+                        p.Q(next_node.x - (spacing/2), next_node.y - next_node.size, xMedium - line_stroke_thick, yMedium2)
+                        p.T(points[k].x + points[k].width, points[k].y - points[k].size)
 
                     p.Z()
                     d.append(p)
@@ -281,10 +286,10 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     size_end = points[n[1][n[1].index(k) + 1]].size
 
                     x1_start = points[k].x + points[k].width
-                    y1_start = height - points[k].y + size_start
+                    y1_start = points[k].y
 
                     x1_end = points[n[1][n[1].index(k) + 1]].x
-                    y1_end = height - points[n[1][n[1].index(k) + 1]].y + size_end
+                    y1_end = points[n[1][n[1].index(k) + 1]].y
 
                     x2_start = x1_start
                     y2_start = y1_start - size_start
@@ -340,10 +345,10 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     size_end = points[n[1][n[1].index(k) + 1]].size
 
                     x1_start = points[k].x + points[k].width
-                    y1_start = height - points[k].y
+                    y1_start = points[k].y - points[k].size
 
                     x1_end = points[n[1][n[1].index(k) + 1]].x
-                    y1_end = height - points[n[1][n[1].index(k) + 1]].y
+                    y1_end = points[n[1][n[1].index(k) + 1]].y - points[n[1][n[1].index(k) + 1]].size
 
                     x2_start = x1_start
                     y2_start = y1_start + size_start
@@ -390,7 +395,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
         elif not color_startEnd and not color_categories:
             color = nodes_color
         if node.label != '':
-            r = draw.Rectangle(node.x, height - node.y, node.width, node.size, fill=color, stroke=color) #stroke="black"
+            r = draw.Rectangle(node.x, node.y - node.size, node.width, node.size, fill=color, stroke=color) #stroke="black"
             d.append(r)
 
         if show_labels:
@@ -410,7 +415,7 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                         break
             elif label_shortening == "clip":
                 clip = draw.ClipPath()
-                clip.append(draw.Rectangle(node.x, height-node.y-(spacing/5), n2-(n2/8), node.size+2*(spacing/5)))
+                clip.append(draw.Rectangle(node.x, node.y-node.size-(spacing/5), n2-(n2/8), node.size+2*(spacing/5)))
             elif label_shortening == "new_line":
                 if len(txt)*(label_size/2) > n2-2*(n2/8):
                     margin = int((n2-2*(n2/8))/(label_size/2))
@@ -418,70 +423,66 @@ def genSVG(nodes, spacing, node_size, width=None, height=None, minValue=1, maxVa
                     while len(txt)*l > node.size+2*(spacing/8) and l > 1:
                         l -= 1
 
-            label_pos_y = height - node.y + (node.size/2) - (l/2)
+            label_pos_y = node.y - (node.size/2) + (l/2)
             if label_position == "start_end":
                 if node.label not in [n.label for n in points][:node.index] or node.label not in [n.label for n in points][node.index+1:] and node.index < len(points) and node.x != max([n.x for n in points]):
                     if label_shortening == "clip":
                         label = draw.Text(txt, x=node.x+node.width+(n2/8), y=label_pos_y,
-                                          fontSize=l, font_family=label_font, fill=label_color, clip_path=clip)
+                                          font_size=l, font_family=label_font, fill=label_color, clip_path=clip)
                     else:
                         label = draw.Text(txt, x=node.x-(n2/8), y=label_pos_y,
-                                          fontSize=l, font_family=label_font, fill=label_color, text_anchor="end")
+                                          font_size=l, font_family=label_font, fill=label_color, text_anchor="end")
 
             elif label_position == "nodes":
                 if label_shortening == "clip":
                     label = draw.Text(txt, x=node.x+node.width+(n2/8), y=label_pos_y,
-                                      fontSize=l, font_family=label_font, fill=label_color, clip_path=clip)
+                                      font_size=l, font_family=label_font, fill=label_color, clip_path=clip)
                 else:
                     label = draw.Text(txt, x=node.x + node.width+(n2/8), y=label_pos_y,
-                                      fontSize=l, font_family=label_font, fill=label_color)
+                                      font_size=l, font_family=label_font, fill=label_color)
             d.append(label)
     
     # Add legend to canvas
     if color_categories and legend:
-        offset = 5  # Alternative: offset = spacing
-        spacing_bottom = 5  # Alternative: spacing_bottom = spacing
-        symbol_size = sum([x.size for x in points])/len(points)
-        
-        legend_height = (symbol_size+offset) * len(category_colors)
-        legend_header_y = legend_height + symbol_size + spacing_bottom + (offset)
-        legend_header = draw.Text("Legend", x=points[0].x, y=legend_header_y, fontSize=label_size,
+        # Use same spacing as main visualization nodes
+        legend_spacing = spacingy  # Match node vertical spacing
+        symbol_size = sum([x.size for x in points])/len(points)  # Average node size
+        symbol_width = symbol_size  # Make symbols square (width = height)
+
+        # Calculate legend position from bottom, using same logic as main nodes
+        legend_start_y = height - spacing
+        total_legend_height = len(category_colors) * (symbol_size + legend_spacing)
+
+        # Position legend header closer to legend items
+        legend_header_y = legend_start_y - total_legend_height - (spacing/2)  # Reduced spacing
+        legend_header = draw.Text("Legend", x=points[0].x, y=legend_header_y, font_size=label_size,
                                   font_family=label_font, fill=label_color)
 
         if debug_legend:
-            print('Legend Title')
-            print('legend_height: {}'.format(legend_height))
-            print('legend_header_y: {}'.format(legend_header_y))
-            print('points[0].x: {}'.format(points[0].x))
-            print('legend_header_y'.format(legend_header_y))
+            print('Legend spacing (spacingy):', legend_spacing)
+            print('Symbol size:', symbol_size)
+            print('Symbol width:', symbol_width)
+            print('Legend header y:', legend_header_y)
             print()
 
         d.append(legend_header)
-        symbol_y_shift = 0
+
+        # Draw legend items from top to bottom with same spacing as main nodes
+        current_y = legend_header_y + label_size + (spacing/4)  # Small gap after header
         for e in category_colors.items():
+            # Square symbol rectangle (width = height)
+            symbol = draw.Rectangle(points[0].x, current_y, symbol_width, symbol_size,
+                                  fill=e[1], stroke=e[1])
 
-            legend_label_y = spacing_bottom + legend_height + (symbol_size/2) - (label_size/2) - offset - symbol_y_shift
+            # Label text
+            label_y = current_y + (symbol_size/2) + (label_size/2)
+            name = draw.Text(e[0], x=points[0].x + symbol_width + (spacing/4), y=label_y,
+                           font_size=label_size, fill=label_color)
 
-            symbol = draw.Rectangle(points[0].x, spacing_bottom+legend_height-offset-symbol_y_shift,
-                                    points[0].width, symbol_size, fill=e[1], stroke=e[1]) #stroke="black"
-
-
-            if debug_legend:
-                print(e)
-                print('points[0].x: {}'.format(points[0].x))
-                print('spacing_bottom+legend_height-offset-symbol_y_shift: {}'.format(spacing_bottom+legend_height-offset-symbol_y_shift))
-                print('points[0].width: {}'.format(points[0].width))
-                print('symbol_size: {}'.format(symbol_size))
-                print()
-
-            name = draw.Text(e[0], x=points[0].x+node.width+(n2/12), y=legend_label_y,
-                             fontSize=label_size, fill=label_color)
             d.append(symbol)
             d.append(name)
-            if spacing_bottom+legend_height-(offset)-symbol_y_shift > spacing_bottom:
-                symbol_y_shift += offset+symbol_size
-            else:
-                symbol_y_shift = 0
+
+            current_y += symbol_size + legend_spacing  # Use same spacing as main visualization
             
     return d
 
@@ -526,7 +527,7 @@ def visualize(data, spacing=50, node_size=10, width=None, height=None, minValue=
     sort_by (str): "frequency" or "alphabetical" or "category", defaults to "frequency"
 
     Returns:
-    (drawSvg.drawing.Drawing): The finished graph
+    (drawsvg.drawing.Drawing): The finished graph
     """
 
     nodes = pcf.nodify(data, sort_by=sort_by)
